@@ -9,9 +9,12 @@ export default async function HomePage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-3xl sm:text-4xl font-bold">Leaderboard</h1>
-        <p className="text-sm text-[color:var(--text-dim)] mt-1">Updated every 15 min during match days. Ties broken by total goals.</p>
+      <div className="mb-6 flex items-center gap-5">
+        <img src="/logo.png" alt="FFF League" className="hidden sm:block h-24 w-24" />
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-bold">Leaderboard</h1>
+          <p className="text-sm text-[color:var(--text-dim)] mt-1">Updated every 15 min during match days. Ties broken by total goals.</p>
+        </div>
       </div>
 
       {rows.length === 0 ? (

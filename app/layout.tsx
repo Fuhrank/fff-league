@@ -13,9 +13,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen">
         <header className="border-b border-line bg-elev">
           <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
-            <Link href="/" className="flex items-baseline gap-3">
-              <span className="title-treatment text-2xl sm:text-3xl">FFF LEAGUE</span>
-              <span className="hidden sm:inline text-xs uppercase tracking-widest text-[color:var(--text-dim)]">Frank's Fantasy Fútbol</span>
+            <Link href="/" className="flex items-center gap-3">
+              <img src="/logo.png" alt="FFF League" className="h-10 w-10 sm:h-12 sm:w-12" />
+              <div className="flex flex-col leading-tight">
+                <span className="title-treatment text-xl sm:text-2xl">FFF LEAGUE</span>
+                <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[color:var(--text-dim)]">Frank's Fantasy Fútbol</span>
+              </div>
             </Link>
             <nav className="flex gap-4 text-sm">
               <Link href="/" className="hover:gold-bright">Leaderboard</Link>
