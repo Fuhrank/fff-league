@@ -1,65 +1,62 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
+import { loadLeaderboard } from '@/lib/scoring';
 
-export default function Home() {
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const rows = await loadLeaderboard(supabase);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div>
+      <div className="mb-6">
+        <h1 className="text-3xl sm:text-4xl font-bold">Leaderboard</h1>
+        <p className="text-sm text-[color:var(--text-dim)] mt-1">Updated every 15 min during match days. Ties broken by total goals.</p>
+      </div>
+
+      {rows.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <div className="rounded-xl border border-line bg-card overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-elev text-[color:var(--text-dim)] uppercase text-xs tracking-wider">
+              <tr>
+                <th className="text-left px-4 py-3 w-12">#</th>
+                <th className="text-left px-4 py-3">Owner</th>
+                <th className="text-right px-4 py-3">Goals</th>
+                <th className="text-right px-4 py-3">Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, i) => (
+                <tr key={r.player_id} className="border-t border-line hover:bg-elev transition-colors">
+                  <td className="px-4 py-3 gold">{i + 1}</td>
+                  <td className="px-4 py-3">
+                    <Link href={`/player/${r.slug}`} className="hover:gold-bright font-medium">
+                      {r.name}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-right text-[color:var(--text-dim)]">{r.goals}</td>
+                  <td className="px-4 py-3 text-right font-bold gold-bright text-base">{r.total}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      )}
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="rounded-xl border border-line bg-card p-10 text-center">
+      <p className="text-5xl mb-3">🏆</p>
+      <h2 className="text-xl font-semibold gold-bright">Draft pending</h2>
+      <p className="text-sm text-[color:var(--text-dim)] mt-2 max-w-md mx-auto">
+        Once the 12 owners draft their 4 teams each, the leaderboard fills in here.
+        World Cup kicks off June 11, 2026.
+      </p>
     </div>
   );
 }

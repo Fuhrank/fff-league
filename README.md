@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FFF LEAGUE — Frank's Fantasy Fútbol
 
-## Getting Started
+> 48 teams. 12 owners. One champion.
 
-First, run the development server:
+World Cup 2026 fantasy league. Each owner drafts 4 national teams. Points roll in automatically as matches finish.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Stack
+- **Next.js 15** (App Router) on **Vercel** Hobby (free)
+- **Supabase** Postgres (free) for data
+- **Football-Data.org** v4 (free) as match source
+- **Vercel Cron** every 15 min during the tournament
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scoring
+| Event | Points |
+|---|---|
+| Win (regulation/ET) | +3 |
+| Draw (incl. PK winner: +1 + advancement) | +1 |
+| Goal scored (own goals & shootout goals excluded) | +1 |
+| Advance to R32 (survive groups) | +5 |
+| Advance to R16 | +6 |
+| Advance to QF | +7 |
+| Advance to SF | +8 |
+| Advance to Final | +9 |
+| Champion | +10 |
+| Wooden spoon — bottom 10 owners | +10 / bottom team |
+| Wooden spoon — bottom 2 owners | +20 / bottom team |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Tiebreaker: total goals across owner's 4 teams (desc).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Setup
+1. Create Supabase project, paste `supabase/schema.sql` then `supabase/seed_teams.sql`.
+2. Copy `.env.example` → `.env.local`, fill in values.
+3. `npm install && npm run dev` → http://localhost:3000
+4. Visit `/admin`, log in with `ADMIN_PASSWORD`, add owners + draft picks.
+5. Deploy: `vercel`. Set env vars in Vercel dashboard. Cron runs automatically.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Pages
+- `/` — leaderboard
+- `/player/[slug]` — owner detail with per-team breakdown
+- `/today` — today's matches w/ live scores
+- `/admin` — add owners, record picks, force sync/recompute
