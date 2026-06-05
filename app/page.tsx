@@ -1,114 +1,40 @@
-import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import { loadLeaderboard } from '@/lib/scoring';
-
-export const revalidate = 60;
-
-export default async function HomePage() {
-  const rows = await loadLeaderboard(supabase);
-
-  const { count: picksCount } = await supabase
-    .from('picks')
-    .select('id', { count: 'exact', head: true });
-  const preDraft = (picksCount ?? 0) === 0;
-
+export default function HomePage() {
   return (
     <div>
       {/* ============ HERO ============ */}
-      <div className="mb-8 flex items-center gap-5">
-        <img src="/logo.png" alt="FFF League" className="hidden sm:block h-24 w-24" />
+      <div className="mb-8 flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+        <img src="/logo.png" alt="FFF League" className="h-28 w-28 sm:h-32 sm:w-32" />
         <div>
-          <h1 className="text-3xl sm:text-5xl font-bold gold-bright tracking-tight">Frank&apos;s Fantasy Fútbol</h1>
-          <p className="text-sm sm:text-base text-[color:var(--text-dim)] mt-1">
-            12 owners. 48 teams. 1 World Cup. Champion crowned July 19, 2026.
+          <h1 className="text-4xl sm:text-6xl font-extrabold gold-bright tracking-tight leading-none">
+            Frank&apos;s Fantasy Fútbol
+          </h1>
+          <p className="text-sm sm:text-base text-[color:var(--text-dim)] mt-2 uppercase tracking-widest">
+            12 owners • 48 teams • 1 World Cup
           </p>
         </div>
       </div>
 
       {/* ============ BRACKET ============ */}
-      <div className="rounded-2xl border border-line bg-card overflow-hidden mb-8 shadow-2xl">
+      <div className="rounded-2xl border border-line bg-card overflow-hidden mb-10 shadow-2xl">
         <img
           src="/bracket-2026.jpg"
-          alt="FIFA World Cup 2026 Bracket — 48 teams, 104 matches, 1 champion"
+          alt="2026 FIFA World Cup Bracket — 48 teams, 104 matches, 1 champion"
           className="w-full h-auto block"
         />
       </div>
 
       {/* ============ TAGLINE ============ */}
-      <div className="my-10 sm:my-14 text-center">
-        <p className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+      <div className="my-12 sm:my-20 text-center">
+        <p className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight">
           <span className="text-white">Financial Freedom is One </span>
           <span className="gold-bright">GOAL</span>
           <span className="text-white"> Away!</span>
         </p>
-        <div className="mt-4 mx-auto h-px w-24 bg-[color:var(--gold)] opacity-60" />
+        <div className="mt-6 mx-auto h-px w-32 bg-[color:var(--gold)] opacity-60" />
+        <p className="mt-6 text-xs sm:text-sm text-[color:var(--text-dim)] uppercase tracking-[0.3em]">
+          Champion crowned · July 19, 2026 · New York / New Jersey
+        </p>
       </div>
-
-      {/* ============ LEADERBOARD ============ */}
-      <div className="mb-5 flex items-end justify-between">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold">Leaderboard</h2>
-          <p className="text-xs text-[color:var(--text-dim)] mt-1">
-            Updates every 15 min on match days. Ties broken by total goals.
-          </p>
-        </div>
-        <Link href="/teams" className="text-xs gold hover:gold-bright">
-          The 48 →
-        </Link>
-      </div>
-
-      {preDraft && rows.length > 0 && (
-        <div className="rounded-xl border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/5 px-4 py-3 mb-5 text-sm">
-          <span className="gold-bright font-semibold">Draft pending.</span>{' '}
-          <span className="text-[color:var(--text-dim)]">
-            {rows.length} of 12 owners signed up. Pick order + teams TBD. World Cup kicks off June 11, 2026.
-          </span>
-        </div>
-      )}
-
-      {rows.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <div className="rounded-xl border border-line bg-card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-elev text-[color:var(--text-dim)] uppercase text-xs tracking-wider">
-              <tr>
-                <th className="text-left px-4 py-3 w-12">#</th>
-                <th className="text-left px-4 py-3">Owner</th>
-                <th className="text-right px-4 py-3">Goals</th>
-                <th className="text-right px-4 py-3">Points</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => (
-                <tr key={r.player_id} className="border-t border-line hover:bg-elev transition-colors">
-                  <td className="px-4 py-3 gold">{i + 1}</td>
-                  <td className="px-4 py-3">
-                    <Link href={`/player/${r.slug}`} className="hover:gold-bright font-medium">
-                      {r.name}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-right text-[color:var(--text-dim)]">{r.goals}</td>
-                  <td className="px-4 py-3 text-right font-bold gold-bright text-base">{r.total}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="rounded-xl border border-line bg-card p-10 text-center">
-      <p className="text-5xl mb-3">🏆</p>
-      <h2 className="text-xl font-semibold gold-bright">Draft pending</h2>
-      <p className="text-sm text-[color:var(--text-dim)] mt-2 max-w-md mx-auto">
-        Once the 12 owners draft their 4 teams each, the leaderboard fills in here.
-        World Cup kicks off June 11, 2026.
-      </p>
     </div>
   );
 }
