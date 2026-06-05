@@ -7,7 +7,6 @@ export const revalidate = 60;
 export default async function HomePage() {
   const rows = await loadLeaderboard(supabase);
 
-  // Count picks to detect pre-draft state.
   const { count: picksCount } = await supabase
     .from('picks')
     .select('id', { count: 'exact', head: true });
@@ -15,12 +14,47 @@ export default async function HomePage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center gap-5">
+      {/* ============ HERO ============ */}
+      <div className="mb-8 flex items-center gap-5">
         <img src="/logo.png" alt="FFF League" className="hidden sm:block h-24 w-24" />
         <div>
-          <h1 className="text-3xl sm:text-4xl font-bold">Leaderboard</h1>
-          <p className="text-sm text-[color:var(--text-dim)] mt-1">Updated every 15 min during match days. Ties broken by total goals.</p>
+          <h1 className="text-3xl sm:text-5xl font-bold gold-bright tracking-tight">Frank&apos;s Fantasy Fútbol</h1>
+          <p className="text-sm sm:text-base text-[color:var(--text-dim)] mt-1">
+            12 owners. 48 teams. 1 World Cup. Champion crowned July 19, 2026.
+          </p>
         </div>
+      </div>
+
+      {/* ============ BRACKET ============ */}
+      <div className="rounded-2xl border border-line bg-card overflow-hidden mb-8 shadow-2xl">
+        <img
+          src="/bracket-2026.jpg"
+          alt="FIFA World Cup 2026 Bracket — 48 teams, 104 matches, 1 champion"
+          className="w-full h-auto block"
+        />
+      </div>
+
+      {/* ============ TAGLINE ============ */}
+      <div className="my-10 sm:my-14 text-center">
+        <p className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+          <span className="text-white">Financial Freedom is One </span>
+          <span className="gold-bright">GOAL</span>
+          <span className="text-white"> Away!</span>
+        </p>
+        <div className="mt-4 mx-auto h-px w-24 bg-[color:var(--gold)] opacity-60" />
+      </div>
+
+      {/* ============ LEADERBOARD ============ */}
+      <div className="mb-5 flex items-end justify-between">
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold">Leaderboard</h2>
+          <p className="text-xs text-[color:var(--text-dim)] mt-1">
+            Updates every 15 min on match days. Ties broken by total goals.
+          </p>
+        </div>
+        <Link href="/teams" className="text-xs gold hover:gold-bright">
+          The 48 →
+        </Link>
       </div>
 
       {preDraft && rows.length > 0 && (
