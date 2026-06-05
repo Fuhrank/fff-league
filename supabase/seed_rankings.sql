@@ -1,59 +1,74 @@
--- Add ranking + odds columns to teams, then populate.
--- FIFA rankings: latest published (April 2026 cycle).
--- Title odds: consensus pre-tournament futures (decimal odds, lower = bigger favorite).
--- Re-run this any time to refresh.
+-- Refresh team list + title odds for 2026 World Cup.
+-- Source: ESPN futures (June 5, 2026). American odds shown in comments; stored as decimal.
+-- Decimal = (American/100) + 1, so display layer converts back to American.
+-- Re-run any time to refresh.
 
 alter table teams add column if not exists fifa_rank   int;
-alter table teams add column if not exists title_odds  numeric;  -- decimal odds (e.g. 5.5 = +450)
+alter table teams add column if not exists title_odds  numeric;
 
+-- 1. Add the 8 qualifiers missing from the original seed.
+insert into teams (id, name, flag_emoji) values
+  ('SWE','Sweden','🇸🇪'),
+  ('BIH','Bosnia & Herzegovina','🇧🇦'),
+  ('IRQ','Iraq','🇮🇶'),
+  ('COD','DR Congo','🇨🇩'),
+  ('CPV','Cape Verde','🇨🇻'),
+  ('CUW','Curaçao','🇨🇼'),
+  ('HAI','Haiti','🇭🇹'),
+  ('PAN','Panama','🇵🇦')
+on conflict (id) do nothing;
+
+-- 2. Drop teams that did not qualify.
+delete from teams where id in ('ITA','VEN','WAL','POL','NGA','CMR','UKR','DEN');
+
+-- 3. Update odds + ESPN rank for all 48 qualifiers.
 update teams set fifa_rank = data.r, title_odds = data.o from (values
-  ('ARG', 1, 6.0),
-  ('FRA', 2, 6.5),
-  ('ESP', 3, 7.0),
-  ('ENG', 4, 8.0),
-  ('BRA', 5, 7.5),
-  ('POR', 6, 11.0),
-  ('NED', 7, 17.0),
-  ('BEL', 8, 26.0),
-  ('CRO', 9, 41.0),
-  ('GER', 10, 13.0),
-  ('ITA', 11, 19.0),
-  ('COL', 12, 31.0),
-  ('URU', 13, 26.0),
-  ('MAR', 14, 51.0),
-  ('USA', 15, 41.0),
-  ('SUI', 16, 81.0),
-  ('JPN', 17, 67.0),
-  ('SEN', 18, 81.0),
-  ('DEN', 19, 67.0),
-  ('IRN', 20, 251.0),
-  ('MEX', 21, 81.0),
-  ('UKR', 22, 251.0),
-  ('AUT', 23, 81.0),
-  ('KOR', 24, 151.0),
-  ('AUS', 25, 251.0),
-  ('TUR', 26, 81.0),
-  ('ECU', 27, 151.0),
-  ('NOR', 28, 51.0),
-  ('PAR', 29, 251.0),
-  ('TUN', 30, 501.0),
-  ('NGA', 31, 251.0),
-  ('EGY', 32, 251.0),
-  ('CIV', 33, 251.0),
-  ('POL', 34, 151.0),
-  ('CZE', 35, 251.0),
-  ('SCO', 36, 251.0),
-  ('PAN', 37, 501.0),
-  ('ALG', 38, 251.0),
-  ('VEN', 39, 501.0),
-  ('WAL', 40, 251.0),
-  ('GHA', 41, 501.0),
-  ('CMR', 42, 501.0),
-  ('JOR', 43, 1001.0),
-  ('QAT', 44, 1001.0),
-  ('CAN', 45, 251.0),
-  ('UZB', 46, 1001.0),
-  ('KSA', 47, 501.0),
-  ('RSA', 48, 1001.0),
-  ('NZL', 49, 1001.0)
+  ('ESP',  1,    5.20),  -- +420
+  ('FRA',  2,    5.60),  -- +460
+  ('ENG',  3,    7.50),  -- +650
+  ('BRA',  4,    9.50),  -- +850
+  ('POR',  5,   11.00),  -- +1000
+  ('ARG',  6,   11.00),  -- +1000
+  ('GER',  7,   14.00),  -- +1300
+  ('NED',  8,   17.00),  -- +1600
+  ('BEL',  9,   23.00),  -- +2200
+  ('NOR', 10,   36.00),  -- +3500
+  ('COL', 11,   41.00),  -- +4000
+  ('JPN', 12,   46.00),  -- +4500
+  ('MAR', 13,   51.00),  -- +5000
+  ('USA', 14,   61.00),  -- +6000
+  ('URY', 15,   61.00),  -- +6000
+  ('MEX', 16,   66.00),  -- +6500
+  ('SUI', 17,   66.00),  -- +6500
+  ('CRO', 18,   71.00),  -- +7000
+  ('TUR', 19,   81.00),  -- +8000
+  ('ECU', 20,  101.00),  -- +10000
+  ('SEN', 21,  126.00),  -- +12500
+  ('AUT', 22,  126.00),  -- +12500
+  ('CAN', 23,  176.00),  -- +17500
+  ('SWE', 24,  176.00),  -- +17500
+  ('CIV', 25,  176.00),  -- +17500
+  ('PAR', 26,  201.00),  -- +20000
+  ('EGY', 27,  251.00),  -- +25000
+  ('SCO', 28,  301.00),  -- +30000
+  ('BIH', 29,  301.00),  -- +30000
+  ('CZE', 30,  301.00),  -- +30000
+  ('ALG', 31,  401.00),  -- +40000
+  ('KOR', 32,  501.00),  -- +50000
+  ('GHA', 33,  501.00),  -- +50000
+  ('TUN', 34,  501.00),  -- +50000
+  ('IRN', 35,  501.00),  -- +50000
+  ('AUS', 36,  601.00),  -- +60000
+  ('QAT', 37,  751.00),  -- +75000
+  ('KSA', 38,  751.00),  -- +75000
+  ('PAN', 39, 1001.00),  -- +100000
+  ('NZL', 40, 1001.00),  -- +100000
+  ('RSA', 41, 1251.00),  -- +125000
+  ('UZB', 42, 1501.00),  -- +150000
+  ('IRQ', 43, 1501.00),  -- +150000
+  ('JOR', 44, 1501.00),  -- +150000
+  ('COD', 45, 2001.00),  -- +200000
+  ('CPV', 46, 2501.00),  -- +250000
+  ('CUW', 47, 2501.00),  -- +250000
+  ('HAI', 48, 2501.00)   -- +250000
 ) as data(id, r, o) where teams.id = data.id;
