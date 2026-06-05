@@ -7,6 +7,12 @@ export const revalidate = 60;
 export default async function HomePage() {
   const rows = await loadLeaderboard(supabase);
 
+  // Count picks to detect pre-draft state.
+  const { count: picksCount } = await supabase
+    .from('picks')
+    .select('id', { count: 'exact', head: true });
+  const preDraft = (picksCount ?? 0) === 0;
+
   return (
     <div>
       <div className="mb-6 flex items-center gap-5">
@@ -16,6 +22,15 @@ export default async function HomePage() {
           <p className="text-sm text-[color:var(--text-dim)] mt-1">Updated every 15 min during match days. Ties broken by total goals.</p>
         </div>
       </div>
+
+      {preDraft && rows.length > 0 && (
+        <div className="rounded-xl border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/5 px-4 py-3 mb-5 text-sm">
+          <span className="gold-bright font-semibold">Draft pending.</span>{' '}
+          <span className="text-[color:var(--text-dim)]">
+            {rows.length} of 12 owners signed up. Pick order + teams TBD. World Cup kicks off June 11, 2026.
+          </span>
+        </div>
+      )}
 
       {rows.length === 0 ? (
         <EmptyState />
