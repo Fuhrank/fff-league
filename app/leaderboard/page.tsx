@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { loadLeaderboard } from '@/lib/scoring';
+import { loadLeaderboard, type LeaderboardRow } from '@/lib/scoring';
 
 export const revalidate = 60;
 
@@ -15,6 +15,9 @@ export default async function LeaderboardPage() {
     .from('picks')
     .select('id', { count: 'exact', head: true });
   const preDraft = (picksCount ?? 0) === 0;
+
+  const group1 = rows.filter(r => r.group_no === 1);
+  const group2 = rows.filter(r => r.group_no === 2);
 
   return (
     <div>
@@ -32,13 +35,34 @@ export default async function LeaderboardPage() {
         <div className="rounded-xl border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/5 px-4 py-3 mb-5 text-sm">
           <span className="gold-bright font-semibold">Draft pending.</span>{' '}
           <span className="text-[color:var(--text-dim)]">
-            {rows.length} of 12 owners signed up. Pick order + teams TBD. World Cup kicks off June 11, 2026.
+            {rows.length} owners signed up across both groups. World Cup kicks off June 11, 2026.
           </span>
         </div>
       )}
 
       {rows.length === 0 ? (
         <EmptyState />
+      ) : (
+        <div className="space-y-10">
+          <GroupTable title="Group 1" subtitle={`${group1.length} owners`} rows={group1} />
+          <GroupTable title="Group 2" subtitle={`${group2.length} owners`} rows={group2} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GroupTable({ title, subtitle, rows }: { title: string; subtitle: string; rows: LeaderboardRow[] }) {
+  return (
+    <section>
+      <div className="flex items-baseline justify-between mb-3 px-1">
+        <h2 className="text-xl sm:text-2xl font-bold gold-bright tracking-tight">{title}</h2>
+        <span className="text-xs uppercase tracking-widest text-[color:var(--text-dim)]">{subtitle}</span>
+      </div>
+      {rows.length === 0 ? (
+        <div className="rounded-xl border border-line bg-card p-6 text-center text-sm text-[color:var(--text-dim)]">
+          No owners in this group yet.
+        </div>
       ) : (
         <div className="rounded-xl border border-line bg-card overflow-hidden">
           <table className="w-full text-sm">
@@ -67,7 +91,7 @@ export default async function LeaderboardPage() {
           </table>
         </div>
       )}
-    </div>
+    </section>
   );
 }
 
@@ -77,7 +101,7 @@ function EmptyState() {
       <p className="text-5xl mb-3">🏆</p>
       <h2 className="text-xl font-semibold gold-bright">Draft pending</h2>
       <p className="text-sm text-[color:var(--text-dim)] mt-2 max-w-md mx-auto">
-        Once the 12 owners draft their 4 teams each, the leaderboard fills in here.
+        Once owners draft their 4 teams each, the leaderboard fills in here.
         World Cup kicks off June 11, 2026.
       </p>
     </div>

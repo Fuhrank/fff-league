@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 type Team = { id: string; name: string; flag_emoji: string | null };
-type Player = { id: number; name: string; slug: string };
+type Player = { id: number; name: string; slug: string; group_no: number };
 
 export default function AdminPage() {
   const [pw, setPw] = useState('');
@@ -13,6 +13,7 @@ export default function AdminPage() {
   const [status, setStatus] = useState<string>('');
 
   const [newPlayer, setNewPlayer] = useState('');
+  const [newPlayerGroup, setNewPlayerGroup] = useState<1 | 2>(1);
   const [pickPlayer, setPickPlayer] = useState('');
   const [pickTeams, setPickTeams] = useState<string[]>(['', '', '', '']);
 
@@ -72,14 +73,37 @@ export default function AdminPage() {
             value={newPlayer} onChange={e => setNewPlayer(e.target.value)}
             placeholder="Owner name" className="flex-1 px-3 py-2 rounded bg-elev border border-line"
           />
+          <select
+            value={newPlayerGroup}
+            onChange={e => setNewPlayerGroup(Number(e.target.value) as 1 | 2)}
+            className="px-3 py-2 rounded bg-elev border border-line"
+          >
+            <option value={1}>Group 1</option>
+            <option value={2}>Group 2</option>
+          </select>
           <button
-            onClick={async () => { if (newPlayer) { await api('add_player', { name: newPlayer }); setNewPlayer(''); refresh(); } }}
+            onClick={async () => { if (newPlayer) { await api('add_player', { name: newPlayer, group_no: newPlayerGroup }); setNewPlayer(''); refresh(); } }}
             className="px-4 py-2 rounded bg-[color:var(--gold)] text-black font-semibold"
           >Add</button>
         </div>
-        <ul className="mt-4 text-sm space-y-1">
-          {players.map(p => <li key={p.id} className="text-[color:var(--text-dim)]">• {p.name}</li>)}
-        </ul>
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          {[1, 2].map(g => (
+            <div key={g}>
+              <p className="gold-bright font-semibold mb-1">Group {g} ({players.filter(p => p.group_no === g).length})</p>
+              <ul className="space-y-1">
+                {players.filter(p => p.group_no === g).map(p => (
+                  <li key={p.id} className="text-[color:var(--text-dim)] flex items-center justify-between">
+                    <span>• {p.name}</span>
+                    <button
+                      onClick={async () => { await api('set_player_group', { player_id: p.id, group_no: g === 1 ? 2 : 1 }); refresh(); }}
+                      className="text-xs px-2 py-0.5 rounded border border-line hover:gold-bright"
+                    >→ G{g === 1 ? 2 : 1}</button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="rounded-xl border border-line bg-card p-5">

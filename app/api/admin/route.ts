@@ -24,16 +24,24 @@ export async function POST(req: NextRequest) {
       case 'list': {
         const [{ data: teams }, { data: players }] = await Promise.all([
           supabaseAdmin.from('teams').select('id, name, flag_emoji').order('name'),
-          supabaseAdmin.from('players').select('id, name, slug').order('name'),
+          supabaseAdmin.from('players').select('id, name, slug, group_no').order('group_no').order('name'),
         ]);
         return NextResponse.json({ teams, players });
       }
       case 'add_player': {
-        const { name } = body;
+        const { name, group_no } = body;
+        const g = group_no === 2 ? 2 : 1;
         const { data, error } = await supabaseAdmin
-          .from('players').insert({ name, slug: slugify(name) }).select().single();
+          .from('players').insert({ name, slug: slugify(name), group_no: g }).select().single();
         if (error) throw error;
-        return NextResponse.json({ message: `added ${name}`, player: data });
+        return NextResponse.json({ message: `added ${name} (Group ${g})`, player: data });
+      }
+      case 'set_player_group': {
+        const { player_id, group_no } = body;
+        const g = group_no === 2 ? 2 : 1;
+        const { error } = await supabaseAdmin.from('players').update({ group_no: g }).eq('id', player_id);
+        if (error) throw error;
+        return NextResponse.json({ message: `moved to Group ${g}` });
       }
       case 'set_picks': {
         const { player_id, team_ids } = body;
