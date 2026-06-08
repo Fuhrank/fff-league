@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       case 'list': {
         const [{ data: teams }, { data: players }] = await Promise.all([
           supabaseAdmin.from('teams').select('id, name, flag_emoji').order('name'),
-          supabaseAdmin.from('players').select('id, name, slug, group_no').order('group_no').order('name'),
+          supabaseAdmin.from('players').select('id, name, slug, group_no, paid').order('group_no').order('name'),
         ]);
         return NextResponse.json({ teams, players });
       }
@@ -42,6 +42,12 @@ export async function POST(req: NextRequest) {
         const { error } = await supabaseAdmin.from('players').update({ group_no: g }).eq('id', player_id);
         if (error) throw error;
         return NextResponse.json({ message: `moved to Group ${g}` });
+      }
+      case 'set_paid': {
+        const { player_id, paid } = body;
+        const { error } = await supabaseAdmin.from('players').update({ paid: !!paid }).eq('id', player_id);
+        if (error) throw error;
+        return NextResponse.json({ message: paid ? 'marked paid' : 'marked unpaid' });
       }
       case 'set_picks': {
         const { player_id, team_ids } = body;

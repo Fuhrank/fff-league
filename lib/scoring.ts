@@ -231,6 +231,7 @@ export type LeaderboardRow = {
   name: string;
   slug: string;
   group_no: number;
+  paid: boolean;
   total: number;
   goals: number;      // tiebreaker
   breakdown: Record<string, number>;
@@ -238,14 +239,14 @@ export type LeaderboardRow = {
 
 export async function loadLeaderboard(db: SupabaseClient): Promise<LeaderboardRow[]> {
   const [{ data: players }, { data: events }] = await Promise.all([
-    db.from('players').select('id, name, slug, group_no'),
+    db.from('players').select('id, name, slug, group_no, paid'),
     db.from('scoring_events').select('player_id, kind, points'),
   ]);
   if (!players) return [];
 
   const byId = new Map<number, LeaderboardRow>();
   for (const p of players) {
-    byId.set(p.id, { player_id: p.id, name: p.name, slug: p.slug, group_no: p.group_no ?? 1, total: 0, goals: 0, breakdown: {} });
+    byId.set(p.id, { player_id: p.id, name: p.name, slug: p.slug, group_no: p.group_no ?? 1, paid: !!p.paid, total: 0, goals: 0, breakdown: {} });
   }
   for (const e of events ?? []) {
     const row = byId.get(e.player_id);

@@ -70,6 +70,7 @@ function GroupTable({ title, subtitle, rows }: { title: string; subtitle: string
               <tr>
                 <th className="text-left px-4 py-3 w-12">#</th>
                 <th className="text-left px-4 py-3">Owner</th>
+                <th className="text-center px-4 py-3">Buy-in</th>
                 <th className="text-right px-4 py-3">Goals</th>
                 <th className="text-right px-4 py-3">Points</th>
               </tr>
@@ -82,6 +83,17 @@ function GroupTable({ title, subtitle, rows }: { title: string; subtitle: string
                     <Link href={`/player/${r.slug}`} className="hover:gold-bright font-medium">
                       {r.name}
                     </Link>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {r.paid ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-[color:var(--gold)]/15 text-[color:var(--gold)] border border-[color:var(--gold)]/40">
+                        ✓ Paid
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/30">
+                        Unpaid
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right text-[color:var(--text-dim)]">{r.goals}</td>
                   <td className="px-4 py-3 text-right font-bold gold-bright text-base">{r.total}</td>

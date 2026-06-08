@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 type Team = { id: string; name: string; flag_emoji: string | null };
-type Player = { id: number; name: string; slug: string; group_no: number };
+type Player = { id: number; name: string; slug: string; group_no: number; paid: boolean };
 
 export default function AdminPage() {
   const [pw, setPw] = useState('');
@@ -92,8 +92,13 @@ export default function AdminPage() {
               <p className="gold-bright font-semibold mb-1">Group {g} ({players.filter(p => p.group_no === g).length})</p>
               <ul className="space-y-1">
                 {players.filter(p => p.group_no === g).map(p => (
-                  <li key={p.id} className="text-[color:var(--text-dim)] flex items-center justify-between">
-                    <span>• {p.name}</span>
+                  <li key={p.id} className="text-[color:var(--text-dim)] flex items-center justify-between gap-2">
+                    <span className="flex-1">• {p.name}</span>
+                    <button
+                      onClick={async () => { await api('set_paid', { player_id: p.id, paid: !p.paid }); refresh(); }}
+                      className={`text-xs px-2 py-0.5 rounded border ${p.paid ? 'border-[color:var(--gold)]/50 text-[color:var(--gold)]' : 'border-red-500/40 text-red-400'}`}
+                      title="Toggle buy-in paid"
+                    >{p.paid ? '✓ Paid' : 'Unpaid'}</button>
                     <button
                       onClick={async () => { await api('set_player_group', { player_id: p.id, group_no: g === 1 ? 2 : 1 }); refresh(); }}
                       className="text-xs px-2 py-0.5 rounded border border-line hover:gold-bright"
