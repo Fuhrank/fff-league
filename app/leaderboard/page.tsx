@@ -80,9 +80,16 @@ function GroupTable({ title, subtitle, rows }: { title: string; subtitle: string
                 <tr key={r.player_id} className="border-t border-line hover:bg-elev transition-colors">
                   <td className="px-4 py-3 gold">{i + 1}</td>
                   <td className="px-4 py-3">
-                    <Link href={`/player/${r.slug}`} className="hover:gold-bright font-medium">
-                      {r.name}
-                    </Link>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Link href={`/player/${r.slug}`} className="hover:gold-bright font-medium">
+                        {r.name}
+                      </Link>
+                      {r.flags.length > 0 && (
+                        <span className="text-base leading-none tracking-wide" title="Drafted teams">
+                          {r.flags.join(' ')}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-center">
                     {r.paid ? (

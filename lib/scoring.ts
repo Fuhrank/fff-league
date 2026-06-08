@@ -234,19 +234,28 @@ export type LeaderboardRow = {
   paid: boolean;
   total: number;
   goals: number;      // tiebreaker
+  flags: string[];    // drafted team flag emojis
   breakdown: Record<string, number>;
 };
 
 export async function loadLeaderboard(db: SupabaseClient): Promise<LeaderboardRow[]> {
-  const [{ data: players }, { data: events }] = await Promise.all([
+  const [{ data: players }, { data: events }, { data: picks }] = await Promise.all([
     db.from('players').select('id, name, slug, group_no, paid'),
     db.from('scoring_events').select('player_id, kind, points'),
+    db.from('picks').select('player_id, pick_order, team:teams(flag_emoji, name)').order('pick_order'),
   ]);
   if (!players) return [];
 
   const byId = new Map<number, LeaderboardRow>();
   for (const p of players) {
-    byId.set(p.id, { player_id: p.id, name: p.name, slug: p.slug, group_no: p.group_no ?? 1, paid: !!p.paid, total: 0, goals: 0, breakdown: {} });
+    byId.set(p.id, { player_id: p.id, name: p.name, slug: p.slug, group_no: p.group_no ?? 1, paid: !!p.paid, total: 0, goals: 0, flags: [], breakdown: {} });
+  }
+  for (const pk of picks ?? []) {
+    const row = byId.get((pk as any).player_id);
+    if (!row) continue;
+    const team = (pk as any).team;
+    const flag = team?.flag_emoji || '🏳️';
+    row.flags.push(flag);
   }
   for (const e of events ?? []) {
     const row = byId.get(e.player_id);
