@@ -85,8 +85,24 @@ function GroupTable({ title, subtitle, rows }: { title: string; subtitle: string
                         {r.name}
                       </Link>
                       {r.flags.length > 0 && (
-                        <span className="text-base leading-none tracking-wide" title="Drafted teams">
-                          {r.flags.join(' ')}
+                        <span className="inline-flex items-center gap-1">
+                          {r.flags.map((f, idx) => {
+                            const iso = flagEmojiToIso(f);
+                            return iso ? (
+                              <img
+                                key={idx}
+                                src={`https://flagcdn.com/24x18/${iso}.png`}
+                                srcSet={`https://flagcdn.com/48x36/${iso}.png 2x`}
+                                width={24}
+                                height={18}
+                                alt=""
+                                className="rounded-[2px] border border-line/60 shadow-sm"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <span key={idx} className="text-base leading-none">{f}</span>
+                            );
+                          })}
                         </span>
                       )}
                     </div>
@@ -112,6 +128,19 @@ function GroupTable({ title, subtitle, rows }: { title: string; subtitle: string
       )}
     </section>
   );
+}
+
+// Convert a flag emoji (e.g. 🇧🇷) to its ISO-3166-1 alpha-2 code (e.g. "br")
+// so we can render SVG flag images that work on Windows (which lacks color flag glyphs).
+function flagEmojiToIso(emoji: string): string | null {
+  if (!emoji) return null;
+  const cps = [...emoji].map(c => c.codePointAt(0) ?? 0);
+  if (cps.length < 2) return null;
+  const A = 0x1F1E6;
+  const c1 = cps[0] - A;
+  const c2 = cps[1] - A;
+  if (c1 < 0 || c1 > 25 || c2 < 0 || c2 > 25) return null;
+  return String.fromCharCode(97 + c1, 97 + c2);
 }
 
 function EmptyState() {
