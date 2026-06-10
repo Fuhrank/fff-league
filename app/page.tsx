@@ -15,7 +15,7 @@ export default function HomePage() {
       </div>
 
       {/* ============ BRACKET + SIDE BANNER ============ */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 mb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-4 mb-6">
         <div className="rounded-2xl border border-line bg-card overflow-hidden shadow-2xl">
           <img
             src="/bracket-2026.jpg"
@@ -25,29 +25,29 @@ export default function HomePage() {
         </div>
 
         {/* ============ SIDE WAGERS BANNER ============ */}
-        <aside className="rounded-2xl border-2 border-[color:var(--gold)] bg-card p-6 flex flex-col justify-center text-center shadow-2xl">
-          <div className="text-xs uppercase tracking-[0.3em] text-[color:var(--text-dim)] mb-3">
+        <aside className="rounded-xl border border-[color:var(--gold)] bg-card p-4 flex flex-col justify-center text-center shadow-lg">
+          <div className="text-[10px] uppercase tracking-[0.25em] text-[color:var(--text-dim)] mb-2">
             🎲 Place Your Bets
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold gold-bright leading-tight mb-4">
+          <h2 className="text-lg sm:text-xl font-extrabold gold-bright leading-tight mb-2">
             Side Wagers Accepted
           </h2>
-          <p className="text-sm sm:text-base text-white leading-relaxed mb-4">
+          <p className="text-xs text-white leading-snug mb-2">
             Pick the team that you think will win it all.
           </p>
-          <div className="mx-auto h-px w-20 bg-[color:var(--gold)] opacity-60 my-3" />
-          <p className="text-xs uppercase tracking-widest text-[color:var(--text-dim)] mb-4">
+          <div className="mx-auto h-px w-12 bg-[color:var(--gold)] opacity-60 my-2" />
+          <p className="text-[10px] uppercase tracking-widest text-[color:var(--text-dim)] mb-2">
             Odds provided by
             <br />
-            <span className="gold-bright font-bold text-sm">FrankPicks LLC</span>
+            <span className="gold-bright font-bold text-xs">FrankPicks LLC</span>
           </p>
-          <div className="mt-2 pt-4 border-t border-line">
-            <p className="text-[10px] uppercase tracking-widest text-[color:var(--text-dim)] mb-2">
+          <div className="mt-1 pt-2 border-t border-line">
+            <p className="text-[9px] uppercase tracking-widest text-[color:var(--text-dim)] mb-1">
               Contact
             </p>
             <a
               href="mailto:OwnersLeagueLLC@gmail.com"
-              className="text-xs sm:text-sm gold-bright font-semibold break-all hover:underline"
+              className="text-[11px] gold-bright font-semibold break-all hover:underline"
             >
               OwnersLeagueLLC@gmail.com
             </a>
@@ -56,26 +56,21 @@ export default function HomePage() {
       </div>
 
       {/* ============ SPONSOR BANNER ============ */}
-      <div className="my-10 rounded-2xl border-2 border-[color:var(--gold)] bg-card overflow-hidden shadow-2xl">
-        <div className="flex flex-col sm:flex-row items-center gap-6 p-6 sm:p-8">
+      <div className="my-6 rounded-xl border border-[color:var(--gold)] bg-card overflow-hidden shadow-lg max-w-2xl mx-auto">
+        <div className="flex flex-row items-center gap-4 p-4">
           <img
             src="/marvelous-megan.svg"
             alt="Marvelous Megan"
-            className="h-32 w-32 sm:h-40 sm:w-40 flex-shrink-0 drop-shadow-2xl"
+            className="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 drop-shadow-lg"
           />
-          <div className="flex-1 text-center sm:text-left">
-            <p className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-[color:var(--text-dim)] mb-2">
-              ✨ Proudly Presented By ✨
+          <div className="flex-1 text-left">
+            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.3em] text-[color:var(--text-dim)] mb-1">
+              ✨ Proudly Presented By
             </p>
-            <h2 className="text-2xl sm:text-4xl font-extrabold leading-tight mb-2">
-              <span className="text-white">Thank you to our biggest sponsor,</span>
-              <br />
+            <h2 className="text-sm sm:text-lg font-extrabold leading-tight">
+              <span className="text-white">Thank you to our biggest sponsor, </span>
               <span className="gold-bright">Marvelous Megan</span>
             </h2>
-            <div className="mt-3 mx-auto sm:mx-0 h-px w-24 bg-[color:var(--gold)] opacity-60" />
-            <p className="text-xs sm:text-sm text-[color:var(--text-dim)] uppercase tracking-widest mt-3">
-              Making this league possible
-            </p>
           </div>
         </div>
       </div>
