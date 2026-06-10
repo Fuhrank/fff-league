@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ wagers: data });
       }
       case 'add_wager': {
-        const { player_a_id, player_b_id, stake_tokens, terms } = body;
+        const { player_a_id, player_b_id, stake_tokens, terms, match_label } = body;
         if (!player_a_id || !player_b_id || player_a_id === player_b_id) {
           return NextResponse.json({ error: 'pick two different players' }, { status: 400 });
         }
@@ -85,6 +85,7 @@ export async function POST(req: NextRequest) {
           player_a_id, player_b_id,
           stake_tokens: Number(stake_tokens) || 0,
           terms: terms || 'Pick the team that will win it all',
+          match_label: match_label || null,
           status: 'active',
         }).select().single();
         if (error) throw error;

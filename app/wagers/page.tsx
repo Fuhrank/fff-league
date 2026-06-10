@@ -6,6 +6,7 @@ type Wager = {
   id: string;
   stake_tokens: number;
   terms: string;
+  match_label: string | null;
   status: string;
   pick_a: string | null;
   pick_b: string | null;
@@ -19,7 +20,7 @@ export default async function WagersPage() {
   const { data: wagersRaw } = await supabase
     .from('wagers')
     .select(`
-      id, stake_tokens, terms, status, pick_a, pick_b, winner_player_id, created_at,
+      id, stake_tokens, terms, match_label, status, pick_a, pick_b, winner_player_id, created_at,
       player_a:players!wagers_player_a_id_fkey(id, name, slug, group_no),
       player_b:players!wagers_player_b_id_fkey(id, name, slug, group_no)
     `)
@@ -83,7 +84,7 @@ function WagerCard({ w, settled }: { w: Wager; settled?: boolean }) {
   const winnerIsB = w.winner_player_id && b && w.winner_player_id === b.id;
   return (
     <div className={`rounded-xl border bg-card p-4 sm:p-5 ${settled ? 'border-line opacity-80' : 'border-[color:var(--gold)]/50'}`}>
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] uppercase tracking-widest text-[color:var(--text-dim)]">
           {w.terms}
         </span>
@@ -91,6 +92,11 @@ function WagerCard({ w, settled }: { w: Wager; settled?: boolean }) {
           {settled ? w.status.toUpperCase() : '● ACTIVE'}
         </span>
       </div>
+      {w.match_label && (
+        <div className="text-sm font-semibold gold-bright mb-3 text-center">
+          ⚽ {w.match_label}
+        </div>
+      )}
       <div className="flex items-center justify-between gap-3">
         <Side player={a} pick={w.pick_a} winner={!!winnerIsA} />
         <div className="text-center px-2 sm:px-4 flex-shrink-0">
