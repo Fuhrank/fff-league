@@ -69,6 +69,49 @@ export async function POST(req: NextRequest) {
         const r = await recomputeScoring(supabaseAdmin);
         return NextResponse.json({ message: `recomputed ${r.events} events` });
       }
+      case 'list_wagers': {
+        const { data } = await supabaseAdmin
+          .from('wagers')
+          .select(`id, stake_tokens, terms, status, pick_a, pick_b, winner_player_id, player_a_id, player_b_id, created_at`)
+          .order('created_at', { ascending: false });
+        return NextResponse.json({ wagers: data });
+      }
+      case 'add_wager': {
+        const { player_a_id, player_b_id, stake_tokens, terms } = body;
+        if (!player_a_id || !player_b_id || player_a_id === player_b_id) {
+          return NextResponse.json({ error: 'pick two different players' }, { status: 400 });
+        }
+        const { data, error } = await supabaseAdmin.from('wagers').insert({
+          player_a_id, player_b_id,
+          stake_tokens: Number(stake_tokens) || 0,
+          terms: terms || 'Pick the team that will win it all',
+          status: 'active',
+        }).select().single();
+        if (error) throw error;
+        return NextResponse.json({ message: `wager created (${data.stake_tokens} tokens)`, wager: data });
+      }
+      case 'update_wager_picks': {
+        const { wager_id, pick_a, pick_b } = body;
+        const { error } = await supabaseAdmin.from('wagers')
+          .update({ pick_a: pick_a ?? null, pick_b: pick_b ?? null })
+          .eq('id', wager_id);
+        if (error) throw error;
+        return NextResponse.json({ message: 'picks updated' });
+      }
+      case 'settle_wager': {
+        const { wager_id, winner_player_id } = body;
+        const { error } = await supabaseAdmin.from('wagers')
+          .update({ status: 'settled', winner_player_id: winner_player_id ?? null })
+          .eq('id', wager_id);
+        if (error) throw error;
+        return NextResponse.json({ message: 'wager settled' });
+      }
+      case 'delete_wager': {
+        const { wager_id } = body;
+        const { error } = await supabaseAdmin.from('wagers').delete().eq('id', wager_id);
+        if (error) throw error;
+        return NextResponse.json({ message: 'wager deleted' });
+      }
       default:
         return NextResponse.json({ error: 'unknown action' }, { status: 400 });
     }

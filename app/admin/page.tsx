@@ -4,6 +4,17 @@ import { useEffect, useState } from 'react';
 
 type Team = { id: string; name: string; flag_emoji: string | null };
 type Player = { id: number; name: string; slug: string; group_no: number; paid: boolean };
+type Wager = {
+  id: string;
+  stake_tokens: number;
+  terms: string;
+  status: string;
+  pick_a: string | null;
+  pick_b: string | null;
+  winner_player_id: number | null;
+  player_a_id: number;
+  player_b_id: number;
+};
 
 export default function AdminPage() {
   const [pw, setPw] = useState('');
@@ -16,6 +27,12 @@ export default function AdminPage() {
   const [newPlayerGroup, setNewPlayerGroup] = useState<1 | 2>(1);
   const [pickPlayer, setPickPlayer] = useState('');
   const [pickTeams, setPickTeams] = useState<string[]>(['', '', '', '']);
+
+  const [wagers, setWagers] = useState<Wager[]>([]);
+  const [wagerA, setWagerA] = useState('');
+  const [wagerB, setWagerB] = useState('');
+  const [wagerStake, setWagerStake] = useState('20');
+  const [wagerTerms, setWagerTerms] = useState('Pick the team that will win it all');
 
   async function api(action: string, body: any = {}) {
     setStatus('…');
@@ -33,6 +50,8 @@ export default function AdminPage() {
     const j = await api('list');
     if (j?.teams) setTeams(j.teams);
     if (j?.players) setPlayers(j.players);
+    const w = await api('list_wagers');
+    if (w?.wagers) setWagers(w.wagers);
   }
 
   async function login() {
@@ -41,6 +60,8 @@ export default function AdminPage() {
       setAuthed(true);
       setTeams(j.teams);
       setPlayers(j.players);
+      const w = await api('list_wagers');
+      if (w?.wagers) setWagers(w.wagers);
     }
   }
 
@@ -138,6 +159,96 @@ export default function AdminPage() {
           }}
           className="px-4 py-2 rounded bg-[color:var(--gold)] text-black font-semibold"
         >Save picks</button>
+      </section>
+
+      <section className="rounded-xl border border-line bg-card p-5">
+        <h2 className="font-semibold mb-3">Side wagers (tokens)</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_100px_auto] gap-2 mb-3">
+          <select value={wagerA} onChange={e => setWagerA(e.target.value)} className="px-3 py-2 rounded bg-elev border border-line">
+            <option value="">Player A…</option>
+            {players.map(p => <option key={p.id} value={p.id}>{p.name} (G{p.group_no})</option>)}
+          </select>
+          <select value={wagerB} onChange={e => setWagerB(e.target.value)} className="px-3 py-2 rounded bg-elev border border-line">
+            <option value="">Player B…</option>
+            {players.map(p => <option key={p.id} value={p.id}>{p.name} (G{p.group_no})</option>)}
+          </select>
+          <input
+            type="number" value={wagerStake} onChange={e => setWagerStake(e.target.value)}
+            placeholder="Tokens" className="px-3 py-2 rounded bg-elev border border-line"
+          />
+          <button
+            onClick={async () => {
+              if (wagerA && wagerB) {
+                await api('add_wager', {
+                  player_a_id: Number(wagerA), player_b_id: Number(wagerB),
+                  stake_tokens: Number(wagerStake), terms: wagerTerms,
+                });
+                setWagerA(''); setWagerB(''); refresh();
+              }
+            }}
+            className="px-4 py-2 rounded bg-[color:var(--gold)] text-black font-semibold"
+          >Create</button>
+        </div>
+        <input
+          value={wagerTerms} onChange={e => setWagerTerms(e.target.value)}
+          placeholder="Terms" className="w-full px-3 py-2 rounded bg-elev border border-line mb-4"
+        />
+
+        <ul className="space-y-2 text-sm">
+          {wagers.map(w => {
+            const a = players.find(p => p.id === w.player_a_id);
+            const b = players.find(p => p.id === w.player_b_id);
+            return (
+              <li key={w.id} className="rounded border border-line bg-elev p-3">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="font-semibold">
+                    {a?.name ?? '?'} vs {b?.name ?? '?'} — <span className="gold-bright">{w.stake_tokens} tokens</span>
+                  </span>
+                  <span className={`text-xs ${w.status === 'active' ? 'gold-bright' : 'text-[color:var(--text-dim)]'}`}>
+                    {w.status.toUpperCase()}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  <input
+                    defaultValue={w.pick_a ?? ''} placeholder={`${a?.name ?? 'A'}'s pick (e.g. ARG)`}
+                    onBlur={e => api('update_wager_picks', { wager_id: w.id, pick_a: e.target.value, pick_b: w.pick_b }).then(refresh)}
+                    className="px-2 py-1 rounded bg-card border border-line text-xs"
+                  />
+                  <input
+                    defaultValue={w.pick_b ?? ''} placeholder={`${b?.name ?? 'B'}'s pick (e.g. BRA)`}
+                    onBlur={e => api('update_wager_picks', { wager_id: w.id, pick_a: w.pick_a, pick_b: e.target.value }).then(refresh)}
+                    className="px-2 py-1 rounded bg-card border border-line text-xs"
+                  />
+                </div>
+                <div className="flex gap-2 text-xs">
+                  {w.status === 'active' && (
+                    <>
+                      <button
+                        onClick={() => api('settle_wager', { wager_id: w.id, winner_player_id: w.player_a_id }).then(refresh)}
+                        className="px-2 py-1 rounded border border-[color:var(--gold)]/40 hover:gold-bright"
+                      >👑 {a?.name} wins</button>
+                      <button
+                        onClick={() => api('settle_wager', { wager_id: w.id, winner_player_id: w.player_b_id }).then(refresh)}
+                        className="px-2 py-1 rounded border border-[color:var(--gold)]/40 hover:gold-bright"
+                      >👑 {b?.name} wins</button>
+                      <button
+                        onClick={() => api('settle_wager', { wager_id: w.id, winner_player_id: null }).then(refresh)}
+                        className="px-2 py-1 rounded border border-line"
+                      >Push / Cancel</button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => { if (confirm('Delete this wager?')) api('delete_wager', { wager_id: w.id }).then(refresh); }}
+                    className="px-2 py-1 rounded border border-red-500/40 text-red-400 ml-auto"
+                  >Delete</button>
+                </div>
+              </li>
+            );
+          })}
+          {wagers.length === 0 && (
+            <li className="text-[color:var(--text-dim)] text-xs">No wagers yet.</li>
+          )}
+        </ul>
       </section>
 
       <section className="rounded-xl border border-line bg-card p-5">
