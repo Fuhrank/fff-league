@@ -14,13 +14,45 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ============ BRACKET ============ */}
-      <div className="rounded-2xl border border-line bg-card overflow-hidden mb-10 shadow-2xl">
-        <img
-          src="/bracket-2026.jpg"
-          alt="2026 FIFA World Cup Bracket — 48 teams, 104 matches, 1 champion"
-          className="w-full h-auto block"
-        />
+      {/* ============ BRACKET + SIDE BANNER ============ */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 mb-10">
+        <div className="rounded-2xl border border-line bg-card overflow-hidden shadow-2xl">
+          <img
+            src="/bracket-2026.jpg"
+            alt="2026 FIFA World Cup Bracket — 48 teams, 104 matches, 1 champion"
+            className="w-full h-auto block"
+          />
+        </div>
+
+        {/* ============ SIDE WAGERS BANNER ============ */}
+        <aside className="rounded-2xl border-2 border-[color:var(--gold)] bg-card p-6 flex flex-col justify-center text-center shadow-2xl">
+          <div className="text-xs uppercase tracking-[0.3em] text-[color:var(--text-dim)] mb-3">
+            🎲 Place Your Bets
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold gold-bright leading-tight mb-4">
+            Side Wagers Accepted
+          </h2>
+          <p className="text-sm sm:text-base text-white leading-relaxed mb-4">
+            Pick the team that you think will win it all.
+          </p>
+          <div className="mx-auto h-px w-20 bg-[color:var(--gold)] opacity-60 my-3" />
+          <p className="text-xs uppercase tracking-widest text-[color:var(--text-dim)] mb-4">
+            Odds provided by
+            <br />
+            <span className="gold-bright font-bold text-sm">FrankPicks LLC</span>
+          </p>
+          <div className="mt-2 pt-4 border-t border-line">
+            <p className="text-[10px] uppercase tracking-widest text-[color:var(--text-dim)] mb-2">
+              Contact
+            </p>
+            <a
+              href="mailto:OwnersLeagueLLC@gmail.com"
+              className="text-xs sm:text-sm gold-bright font-semibold break-all hover:underline"
+            >
+              OwnersLeagueLLC@gmail.com
+            </a>
+          </div>
+        </aside>
       </div>
 
       {/* ============ TAGLINE ============ */}
