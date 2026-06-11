@@ -3,14 +3,43 @@
 import { useEffect, useState } from 'react';
 
 type Player = { id: number; name: string; group_no: number };
+type MatchOpt = {
+  id: number;
+  utc_date: string;
+  stage: string;
+  status: string;
+  home_id: string;
+  away_id: string;
+  home_name: string;
+  away_name: string;
+  home_flag: string;
+  away_flag: string;
+};
+
+const ET_TZ = 'America/New_York';
+
+function fmtET(iso: string) {
+  const d = new Date(iso);
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: ET_TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+  }).format(d);
+}
+
+function prettyStage(s: string) {
+  return ({
+    GROUP_STAGE: 'Group', LAST_32: 'R32', LAST_16: 'R16',
+    QUARTER_FINALS: 'QF', SEMI_FINALS: 'SF', FINAL: 'Final', THIRD_PLACE: '3rd',
+  } as Record<string, string>)[s] ?? s;
+}
 
 export default function ProposeWagerForm() {
   const [open, setOpen] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [matches, setMatches] = useState<MatchOpt[]>([]);
+  const [matchId, setMatchId] = useState('');
   const [a, setA] = useState('');
   const [b, setB] = useState('');
   const [stake, setStake] = useState('20');
-  const [matchLabel, setMatchLabel] = useState('');
   const [pickA, setPickA] = useState('');
   const [pickB, setPickB] = useState('');
   const [terms, setTerms] = useState('Pick the team that will win the match');
@@ -19,8 +48,16 @@ export default function ProposeWagerForm() {
 
   useEffect(() => {
     if (!open || players.length) return;
-    fetch('/api/wagers/propose').then(r => r.json()).then(j => setPlayers(j.players ?? []));
+    fetch('/api/wagers/propose').then(r => r.json()).then(j => {
+      setPlayers(j.players ?? []);
+      setMatches(j.matches ?? []);
+    });
   }, [open, players.length]);
+
+  const selectedMatch = matches.find(m => String(m.id) === matchId);
+  const matchLabel = selectedMatch
+    ? `${selectedMatch.home_name} vs ${selectedMatch.away_name} · ${fmtET(selectedMatch.utc_date)} ET`
+    : '';
 
   async function submit() {
     setSubmitting(true);
@@ -39,7 +76,7 @@ export default function ProposeWagerForm() {
     setSubmitting(false);
     if (res.ok) {
       setStatus(`✓ ${j.message}`);
-      setA(''); setB(''); setStake('20'); setMatchLabel(''); setPickA(''); setPickB('');
+      setA(''); setB(''); setStake('20'); setMatchId(''); setPickA(''); setPickB('');
     } else {
       setStatus(`✗ ${j.error}`);
     }
@@ -99,12 +136,26 @@ export default function ProposeWagerForm() {
           />
         </div>
         <div>
-          <label className="text-[10px] uppercase tracking-widest text-[color:var(--text-dim)]">Match (optional)</label>
-          <input
-            value={matchLabel} onChange={e => setMatchLabel(e.target.value)}
-            placeholder="e.g. Brazil vs Morocco · June 18"
+          <label className="text-[10px] uppercase tracking-widest text-[color:var(--text-dim)]">Match</label>
+          <select
+            value={matchId}
+            onChange={e => {
+              setMatchId(e.target.value);
+              const m = matches.find(mm => String(mm.id) === e.target.value);
+              if (m) {
+                setPickA(`${m.home_name} ${m.home_flag}`.trim());
+                setPickB(`${m.away_name} ${m.away_flag}`.trim());
+              }
+            }}
             className="w-full mt-1 px-3 py-2 rounded bg-elev border border-line"
-          />
+          >
+            <option value="">Select a 2026 World Cup match…</option>
+            {matches.map(m => (
+              <option key={m.id} value={m.id}>
+                {prettyStage(m.stage)} · {fmtET(m.utc_date)} ET · {m.home_flag} {m.home_name} vs {m.away_flag} {m.away_name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

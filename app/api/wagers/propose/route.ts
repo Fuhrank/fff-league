@@ -41,10 +41,39 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  // Public list of players for the propose form
-  const { data } = await supabaseAdmin
-    .from('players')
-    .select('id, name, group_no')
-    .order('group_no').order('name');
-  return NextResponse.json({ players: data ?? [] });
+  const [{ data: players }, { data: matches }, { data: teams }] = await Promise.all([
+    supabaseAdmin
+      .from('players')
+      .select('id, name, group_no')
+      .order('group_no').order('name'),
+    supabaseAdmin
+      .from('matches')
+      .select('id, stage, utc_date, home_team, away_team, status')
+      .order('utc_date'),
+    supabaseAdmin
+      .from('teams')
+      .select('id, name, flag_emoji'),
+  ]);
+
+  const teamMap = new Map<string, { name: string; flag_emoji: string | null }>(
+    (teams ?? []).map((t: any) => [t.id, { name: t.name, flag_emoji: t.flag_emoji }])
+  );
+  const matchOptions = (matches ?? []).map(m => {
+    const home = teamMap.get(m.home_team);
+    const away = teamMap.get(m.away_team);
+    return {
+      id: m.id,
+      utc_date: m.utc_date,
+      stage: m.stage,
+      status: m.status,
+      home_id: m.home_team,
+      away_id: m.away_team,
+      home_name: home?.name ?? m.home_team,
+      away_name: away?.name ?? m.away_team,
+      home_flag: home?.flag_emoji ?? '',
+      away_flag: away?.flag_emoji ?? '',
+    };
+  });
+
+  return NextResponse.json({ players: players ?? [], matches: matchOptions });
 }
