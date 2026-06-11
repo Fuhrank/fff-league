@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
+import AutoRefresh from './AutoRefresh';
 
-export const revalidate = 60;
+export const revalidate = 20;
 
 const ET_TZ = 'America/New_York';
 
@@ -77,6 +78,13 @@ export default async function TodayPage() {
 
   const teamMap = new Map((teams ?? []).map(t => [t.id, t]));
 
+  // Bucket today's matches.
+  const isLive = (s: string) => s === 'IN_PLAY' || s === 'PAUSED';
+  const isDone = (s: string) => s === 'FINISHED';
+  const liveMatches    = (todayMatches ?? []).filter((m: any) => isLive(m.status));
+  const upcomingToday  = (todayMatches ?? []).filter((m: any) => !isLive(m.status) && !isDone(m.status));
+  const finishedToday  = (todayMatches ?? []).filter((m: any) => isDone(m.status));
+
   // Pick the next ~6 marquee matches (or first 6 if none flagged).
   const marqueeUpcoming = (upcoming ?? []).filter(
     m => MARQUEE.has(m.home_team) || MARQUEE.has(m.away_team)
@@ -84,10 +92,45 @@ export default async function TodayPage() {
 
   return (
     <div>
+      {liveMatches.length > 0 && <AutoRefresh />}
       <h1 className="text-3xl sm:text-4xl font-bold mb-1">Today&apos;s Matches</h1>
       <p className="text-sm text-[color:var(--text-dim)] mb-8">
         {formatET(now, { weekday: 'long', month: 'long', day: 'numeric' })} · Eastern Time
       </p>
+
+      {/* ============ LIVE NOW ============ */}
+      {liveMatches.length > 0 && (
+        <div className="mb-10">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
+            <h2 className="text-xl sm:text-2xl font-bold text-red-400 tracking-wide">LIVE NOW</h2>
+            <span className="text-[10px] uppercase tracking-widest text-[color:var(--text-dim)] ml-1">
+              auto-refreshing every 25s
+            </span>
+          </div>
+          <div className="space-y-3">
+            {liveMatches.map((m: any) => {
+              const home = teamMap.get(m.home_team);
+              const away = teamMap.get(m.away_team);
+              return (
+                <div key={m.id} className="rounded-xl border-2 border-red-500/60 bg-gradient-to-br from-red-500/10 to-card p-5 shadow-lg shadow-red-500/10">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs uppercase tracking-wider text-[color:var(--text-dim)]">{prettyStage(m.stage)}</span>
+                    <span className="text-xs font-bold text-red-400 animate-pulse">● LIVE</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <TeamSide flag={home?.flag_emoji} name={home?.name ?? m.home_team} />
+                    <div className="text-4xl sm:text-5xl font-extrabold gold-bright px-4 tabular-nums">
+                      {m.home_score}<span className="text-[color:var(--text-dim)] mx-2">-</span>{m.away_score}
+                    </div>
+                    <TeamSide flag={away?.flag_emoji} name={away?.name ?? m.away_team} reverse />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {!todayMatches || todayMatches.length === 0 ? (
         <div className="rounded-xl border border-line bg-card p-8 text-center mb-10">
@@ -98,37 +141,27 @@ export default async function TodayPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3 mb-10">
-          {todayMatches.map((m: any) => {
-            const home = teamMap.get(m.home_team);
-            const away = teamMap.get(m.away_team);
-            const ko = formatET(new Date(m.utc_date), { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
-            const live = m.status === 'IN_PLAY' || m.status === 'PAUSED';
-            const done = m.status === 'FINISHED';
-            return (
-              <div key={m.id} className="rounded-xl border border-line bg-card p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs uppercase tracking-wider text-[color:var(--text-dim)]">{prettyStage(m.stage)}</span>
-                  <span className={`text-xs ${live ? 'text-red-400 animate-pulse' : 'text-[color:var(--text-dim)]'}`}>
-                    {live ? '● LIVE' : done ? 'FT' : ko}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <TeamSide flag={home?.flag_emoji} name={home?.name ?? m.home_team} />
-                  <div className="text-2xl font-bold gold-bright px-4 tabular-nums">
-                    {m.home_score}<span className="text-[color:var(--text-dim)] mx-2">-</span>{m.away_score}
-                  </div>
-                  <TeamSide flag={away?.flag_emoji} name={away?.name ?? m.away_team} reverse />
-                </div>
-                {m.duration === 'PENALTY_SHOOTOUT' && (
-                  <div className="text-center text-xs text-[color:var(--text-dim)] mt-2">
-                    Pens: {m.home_pk}-{m.away_pk}
-                  </div>
-                )}
+        <>
+          {/* ============ UPCOMING TODAY ============ */}
+          {upcomingToday.length > 0 && (
+            <div className="mb-10">
+              <h2 className="text-xl font-bold mb-3">⏰ Coming up today</h2>
+              <div className="space-y-3">
+                {upcomingToday.map((m: any) => renderMatchRow(m, teamMap))}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          )}
+
+          {/* ============ FINISHED TODAY ============ */}
+          {finishedToday.length > 0 && (
+            <div className="mb-10">
+              <h2 className="text-xl font-bold mb-3">✅ Final</h2>
+              <div className="space-y-3">
+                {finishedToday.map((m: any) => renderMatchRow(m, teamMap))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* ============ UPCOMING MARQUEE ============ */}
@@ -177,6 +210,36 @@ function TeamSide({ flag, name, reverse }: { flag?: string; name: string; revers
     <div className={`flex items-center gap-2 flex-1 min-w-0 ${reverse ? 'flex-row-reverse text-right' : ''}`}>
       <span className="text-2xl shrink-0">{flag}</span>
       <span className="font-semibold truncate">{name}</span>
+    </div>
+  );
+}
+
+const ET_FMT = (d: Date, opts: Intl.DateTimeFormatOptions) =>
+  new Intl.DateTimeFormat('en-US', { ...opts, timeZone: 'America/New_York' }).format(d);
+
+function renderMatchRow(m: any, teamMap: Map<string, any>) {
+  const home = teamMap.get(m.home_team);
+  const away = teamMap.get(m.away_team);
+  const ko = ET_FMT(new Date(m.utc_date), { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+  const done = m.status === 'FINISHED';
+  return (
+    <div key={m.id} className="rounded-xl border border-line bg-card p-4">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs uppercase tracking-wider text-[color:var(--text-dim)]">{prettyStage(m.stage)}</span>
+        <span className="text-xs text-[color:var(--text-dim)]">{done ? 'FT' : ko}</span>
+      </div>
+      <div className="flex items-center justify-between">
+        <TeamSide flag={home?.flag_emoji} name={home?.name ?? m.home_team} />
+        <div className="text-2xl font-bold gold-bright px-4 tabular-nums">
+          {m.home_score}<span className="text-[color:var(--text-dim)] mx-2">-</span>{m.away_score}
+        </div>
+        <TeamSide flag={away?.flag_emoji} name={away?.name ?? m.away_team} reverse />
+      </div>
+      {m.duration === 'PENALTY_SHOOTOUT' && (
+        <div className="text-center text-xs text-[color:var(--text-dim)] mt-2">
+          Pens: {m.home_pk}-{m.away_pk}
+        </div>
+      )}
     </div>
   );
 }
