@@ -49,6 +49,16 @@ export async function POST(req: NextRequest) {
         if (error) throw error;
         return NextResponse.json({ message: paid ? 'marked paid' : 'marked unpaid' });
       }
+      case 'delete_player': {
+        const { player_id } = body;
+        // Null out winner refs so the cascade delete doesn't choke
+        await supabaseAdmin.from('wagers').update({ winner_player_id: null }).eq('winner_player_id', player_id);
+        // picks + wagers (player_a/b) cascade automatically
+        const { error } = await supabaseAdmin.from('players').delete().eq('id', player_id);
+        if (error) throw error;
+        await recomputeScoring(supabaseAdmin);
+        return NextResponse.json({ message: 'player deleted' });
+      }
       case 'set_picks': {
         const { player_id, team_ids } = body;
         await supabaseAdmin.from('picks').delete().eq('player_id', player_id);

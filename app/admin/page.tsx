@@ -124,6 +124,16 @@ export default function AdminPage() {
                       onClick={async () => { await api('set_player_group', { player_id: p.id, group_no: g === 1 ? 2 : 1 }); refresh(); }}
                       className="text-xs px-2 py-0.5 rounded border border-line hover:gold-bright"
                     >→ G{g === 1 ? 2 : 1}</button>
+                    <button
+                      onClick={async () => {
+                        if (confirm(`Delete ${p.name}? This removes their picks and any wagers involving them.`)) {
+                          await api('delete_player', { player_id: p.id });
+                          refresh();
+                        }
+                      }}
+                      className="text-xs px-2 py-0.5 rounded border border-red-500/40 text-red-400 hover:bg-red-500/10"
+                      title="Delete player"
+                    >✕</button>
                   </li>
                 ))}
               </ul>
