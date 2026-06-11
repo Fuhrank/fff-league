@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/rules" className="hover:gold-bright">Rules</Link>
               <Link href="/teams" className="hover:gold-bright">The 48</Link>
               <Link href="/today" className="hover:gold-bright">Today</Link>
+              <Link href="/odds" className="hover:gold-bright">Odds</Link>
               <Link href="/wagers" className="hover:gold-bright">Wagers</Link>
               <Link href="/admin" className="hover:gold-bright text-[color:var(--text-dim)]">Admin</Link>
             </nav>
