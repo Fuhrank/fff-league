@@ -31,77 +31,90 @@ export async function syncFromFootballData() {
   const json = await res.json();
   const matches: any[] = json.matches ?? [];
 
-  let upserted = 0, goalRows = 0;
-
+  // 1) Bulk upsert teams once (de-duped) — avoids 200+ sequential round-trips.
+  const teamRows = new Map<string, { id: string; fd_id: number | null; name: string }>();
   for (const m of matches) {
     const home = teamCode(m.homeTeam);
     const away = teamCode(m.awayTeam);
-    if (!home || !away) continue; // skip placeholder slots
+    if (home && !teamRows.has(home)) teamRows.set(home, { id: home, fd_id: m.homeTeam?.id ?? null, name: m.homeTeam?.name ?? home });
+    if (away && !teamRows.has(away)) teamRows.set(away, { id: away, fd_id: m.awayTeam?.id ?? null, name: m.awayTeam?.name ?? away });
+  }
+  if (teamRows.size > 0) {
+    const { error: tErr } = await supabaseAdmin
+      .from('teams')
+      .upsert([...teamRows.values()], { onConflict: 'id', ignoreDuplicates: true });
+    if (tErr) throw new Error(`upsert teams: ${tErr.message}`);
+  }
 
-    // Upsert teams (in case we don't have them yet w/ fd_id)
-    await supabaseAdmin.from('teams').upsert([
-      { id: home, fd_id: m.homeTeam?.id, name: m.homeTeam?.name ?? home },
-      { id: away, fd_id: m.awayTeam?.id, name: m.awayTeam?.name ?? away },
-    ], { onConflict: 'id', ignoreDuplicates: true });
+  // 2) Bulk upsert matches in one round-trip.
+  const matchRows = matches
+    .filter(m => teamCode(m.homeTeam) && teamCode(m.awayTeam))
+    .map(m => {
+      const score = m.score ?? {};
+      const ft = score.fullTime ?? {};
+      const pen = score.penalties ?? {};
+      return {
+        id: m.id,
+        stage: m.stage,
+        matchday: m.matchday ?? null,
+        utc_date: m.utcDate,
+        status: m.status,
+        home_team: teamCode(m.homeTeam),
+        away_team: teamCode(m.awayTeam),
+        home_score: ft.home ?? 0,
+        away_score: ft.away ?? 0,
+        home_pk: pen.home ?? null,
+        away_pk: pen.away ?? null,
+        winner: score.winner ?? null,
+        duration: score.duration ?? null,
+        raw: m,
+        updated_at: new Date().toISOString(),
+      };
+    });
+  const { error: mErr } = await supabaseAdmin.from('matches').upsert(matchRows, { onConflict: 'id' });
+  if (mErr) throw new Error(`bulk upsert matches: ${mErr.message}`);
+  const upserted = matchRows.length;
 
-    const score = m.score ?? {};
-    const ft = score.fullTime ?? {};
-    const pen = score.penalties ?? {};
-
-    const row = {
-      id: m.id,
-      stage: m.stage,
-      matchday: m.matchday ?? null,
-      utc_date: m.utcDate,
-      status: m.status,
-      home_team: home,
-      away_team: away,
-      home_score: ft.home ?? 0,
-      away_score: ft.away ?? 0,
-      home_pk: pen.home ?? null,
-      away_pk: pen.away ?? null,
-      winner: score.winner ?? null,
-      duration: score.duration ?? null,
-      raw: m,
-      updated_at: new Date().toISOString(),
-    };
-    const { error } = await supabaseAdmin.from('matches').upsert(row, { onConflict: 'id' });
-    if (error) throw new Error(`upsert match ${m.id}: ${error.message}`);
-    upserted++;
-
-    // Goals — football-data returns them on individual match endpoints, not the list endpoint.
-    // For free-tier friendliness, we fetch goals only for FINISHED matches we haven't fully synced.
-    if (m.status === 'FINISHED') {
-      const { count } = await supabaseAdmin
-        .from('goals')
-        .select('id', { count: 'exact', head: true })
-        .eq('match_id', m.id);
-      const expected = (ft.home ?? 0) + (ft.away ?? 0);
-      if ((count ?? 0) < expected) {
-        const detailRes = await fetch(`${FD_BASE}/matches/${m.id}`, {
-          headers: { 'X-Auth-Token': token }, cache: 'no-store',
-        });
-        if (detailRes.ok) {
-          const detail = await detailRes.json();
-          const goals: any[] = detail?.match?.goals ?? detail?.goals ?? [];
-          if (goals.length) {
-            const rows = goals.map((g: any) => ({
-              match_id: m.id,
-              team_id: teamCode(g.team) ?? home,
-              scorer: g.scorer?.name ?? null,
-              minute: g.minute ?? null,
-              is_own_goal: g.type === 'OWN',
-              is_penalty_shootout: g.type === 'PENALTY_SHOOTOUT',
-            }));
-            await supabaseAdmin.from('goals').upsert(rows, {
-              onConflict: 'match_id,team_id,scorer,minute,is_penalty_shootout',
-              ignoreDuplicates: true,
-            });
-            goalRows += rows.length;
-          }
-        }
-      }
-    }
+  // 3) Goals — only for FINISHED matches that don't have all their goals yet.
+  // Cap detail-fetch per sync to stay under Football-Data rate limit (10 req/min)
+  // and Vercel's 60s function ceiling.
+  let goalRows = 0;
+  const finishedNeedingGoals: any[] = [];
+  for (const m of matches) {
+    if (m.status !== 'FINISHED') continue;
+    const ft = m.score?.fullTime ?? {};
+    const expected = (ft.home ?? 0) + (ft.away ?? 0);
+    if (expected === 0) continue;
+    const { count } = await supabaseAdmin
+      .from('goals')
+      .select('id', { count: 'exact', head: true })
+      .eq('match_id', m.id);
+    if ((count ?? 0) < expected) finishedNeedingGoals.push(m);
+  }
+  // Per-sync cap: at most 6 detail fetches so we never exceed FD's 10/min
+  // (we already used 1 for the list call).
+  for (const m of finishedNeedingGoals.slice(0, 6)) {
+    const home = teamCode(m.homeTeam)!;
+    const detailRes = await fetch(`${FD_BASE}/matches/${m.id}`, {
+      headers: { 'X-Auth-Token': token }, cache: 'no-store',
+    });
+    if (!detailRes.ok) continue;
+    const detail = await detailRes.json();
+    const goals: any[] = detail?.match?.goals ?? detail?.goals ?? [];
+    if (!goals.length) continue;
+    const rows = goals.map((g: any) => ({
+      match_id: m.id,
+      team_id: teamCode(g.team) ?? home,
+      scorer: g.scorer?.name ?? null,
+      minute: g.minute ?? null,
+      is_own_goal: g.type === 'OWN',
+      is_penalty_shootout: g.type === 'PENALTY_SHOOTOUT',
+    }));
+    await supabaseAdmin.from('goals').upsert(rows, {
+      onConflict: 'match_id,team_id,scorer,minute,is_penalty_shootout',
+      ignoreDuplicates: true,
+    });
+    goalRows += rows.length;
   }
 
   return { upserted, goalRows };
