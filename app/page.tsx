@@ -55,26 +55,6 @@ export default function HomePage() {
         </aside>
       </div>
 
-      {/* ============ SPONSOR BANNER ============ */}
-      <div className="my-6 rounded-xl border border-[color:var(--gold)] bg-card overflow-hidden shadow-lg max-w-2xl mx-auto">
-        <div className="flex flex-row items-center gap-4 p-4">
-          <img
-            src="/marvelous-megan.svg"
-            alt="Marvelous Megan"
-            className="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 drop-shadow-lg"
-          />
-          <div className="flex-1 text-left">
-            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.3em] text-[color:var(--text-dim)] mb-1">
-              ✨ Proudly Presented By
-            </p>
-            <h2 className="text-sm sm:text-lg font-extrabold leading-tight">
-              <span className="text-white">Thank you to our biggest sponsor, </span>
-              <span className="gold-bright">Marvelous Megan</span>
-            </h2>
-          </div>
-        </div>
-      </div>
-
       {/* ============ TAGLINE ============ */}
       <div className="my-12 sm:my-20 text-center">
         <p className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight">
