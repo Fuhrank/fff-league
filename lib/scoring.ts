@@ -236,19 +236,62 @@ export type LeaderboardRow = {
   goals: number;      // tiebreaker
   flags: string[];    // drafted team flag emojis
   breakdown: Record<string, number>;
+  grade: string;      // A+, A, B+, ... based on roster strength vs group
+  ev: number;         // expected points from roster (modeled off title odds)
 };
+
+// Expected-points model for a single team given decimal title odds.
+// Implied title prob p = 1/odds. Probability of reaching round r approximated as
+// p ^ ((6 - r + 1)/6) — a monotonic decay so favorites are more likely to reach
+// later rounds. Group-stage baseline scales between 4 (long-shot) and 10 pts
+// (favorite) based on the same implied title prob.
+function teamExpectedPoints(titleOdds: number | null | undefined): number {
+  if (!titleOdds || titleOdds <= 0) return 4; // unknown odds → assume long shot baseline
+  const p = 1 / titleOdds;
+  const groupPts = 4 + 6 * Math.pow(p, 0.2);
+  let adv = 0;
+  const stages: Array<[number, number]> = [
+    [1, 5],   // R32
+    [2, 6],   // R16
+    [3, 7],   // QF
+    [4, 8],   // SF
+    [5, 9],   // Final
+    [6, 10],  // Champion
+  ];
+  for (const [r, pts] of stages) {
+    const pReach = Math.pow(p, (6 - r + 1) / 6);
+    adv += pts * pReach;
+  }
+  return groupPts + adv;
+}
+
+// Letter-grade ladder. We slot players by rank within their group (since G1
+// drafts 4 teams and G2 drafts 6 — EVs are not directly comparable across
+// groups). The ladder length adapts to group size.
+const GRADE_LADDERS: Record<number, string[]> = {
+  8:  ['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F'],
+  12: ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'],
+};
+function ladderFor(n: number): string[] {
+  if (GRADE_LADDERS[n]) return GRADE_LADDERS[n];
+  // Generic fallback: spread A+..F across n players.
+  const base = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
+  if (n <= base.length) return base.slice(0, n);
+  // For groups larger than 12, just repeat the bottom rung.
+  return [...base, ...Array(n - base.length).fill('F')];
+}
 
 export async function loadLeaderboard(db: SupabaseClient): Promise<LeaderboardRow[]> {
   const [{ data: players }, { data: events }, { data: picks }] = await Promise.all([
     db.from('players').select('id, name, slug, group_no, paid'),
     db.from('scoring_events').select('player_id, kind, points'),
-    db.from('picks').select('player_id, pick_order, team:teams(flag_emoji, name)').order('pick_order'),
+    db.from('picks').select('player_id, pick_order, team:teams(flag_emoji, name, title_odds)').order('pick_order'),
   ]);
   if (!players) return [];
 
   const byId = new Map<number, LeaderboardRow>();
   for (const p of players) {
-    byId.set(p.id, { player_id: p.id, name: p.name, slug: p.slug, group_no: p.group_no ?? 1, paid: !!p.paid, total: 0, goals: 0, flags: [], breakdown: {} });
+    byId.set(p.id, { player_id: p.id, name: p.name, slug: p.slug, group_no: p.group_no ?? 1, paid: !!p.paid, total: 0, goals: 0, flags: [], breakdown: {}, grade: '', ev: 0 });
   }
   for (const pk of picks ?? []) {
     const row = byId.get((pk as any).player_id);
@@ -256,6 +299,7 @@ export async function loadLeaderboard(db: SupabaseClient): Promise<LeaderboardRo
     const team = (pk as any).team;
     const flag = team?.flag_emoji || '🏳️';
     row.flags.push(flag);
+    row.ev += teamExpectedPoints(team?.title_odds);
   }
   for (const e of events ?? []) {
     const row = byId.get(e.player_id);
@@ -265,7 +309,22 @@ export async function loadLeaderboard(db: SupabaseClient): Promise<LeaderboardRo
     if (e.kind === 'GOAL') row.goals += e.points;
   }
 
-  return [...byId.values()].sort((a, b) =>
+  // Assign letter grades within each group, ranked by EV (roster strength).
+  const all = Array.from(byId.values());
+  const groups: Record<number, LeaderboardRow[]> = {};
+  for (const r of all) {
+    (groups[r.group_no] ||= []).push(r);
+  }
+  for (const gn of Object.keys(groups)) {
+    const rows = groups[Number(gn)];
+    const ranked = [...rows].sort((a, b) => b.ev - a.ev);
+    const ladder = ladderFor(ranked.length);
+    ranked.forEach((row, i) => {
+      row.grade = ladder[i] ?? 'F';
+    });
+  }
+
+  return all.sort((a, b) =>
     b.total - a.total || b.goals - a.goals || a.name.localeCompare(b.name)
   );
 }

@@ -84,6 +84,7 @@ function GroupTable({ title, subtitle, rows }: { title: string; subtitle: string
                       <Link href={`/player/${r.slug}`} className="hover:gold-bright font-medium">
                         {r.name}
                       </Link>
+                      {r.grade && <GradeBadge grade={r.grade} />}
                       {r.flags.length > 0 && (
                         <span className="inline-flex items-center gap-1">
                           {r.flags.map((f, idx) => {
@@ -127,6 +128,24 @@ function GroupTable({ title, subtitle, rows }: { title: string; subtitle: string
         </div>
       )}
     </section>
+  );
+}
+
+function GradeBadge({ grade }: { grade: string }) {
+  // Color by tier — green for A's, gold for B's, orange for C's, red for D/F.
+  const tier = grade[0];
+  const cls =
+    tier === 'A' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40' :
+    tier === 'B' ? 'bg-[color:var(--gold)]/15 text-[color:var(--gold)] border-[color:var(--gold)]/40' :
+    tier === 'C' ? 'bg-orange-500/15 text-orange-300 border-orange-500/40' :
+                   'bg-red-500/15 text-red-300 border-red-500/40';
+  return (
+    <span
+      title="Draft grade — graded within group by Vegas-implied roster strength"
+      className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold border tracking-wider ${cls}`}
+    >
+      {grade}
+    </span>
   );
 }
 
