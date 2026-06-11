@@ -65,6 +65,19 @@ export default async function WagersPage() {
         </div>
       )}
 
+      {/* ============ PENDING ============ */}
+      {pending.length > 0 && (
+        <>
+          <h2 className="text-xl font-bold mb-3">⏳ Pending Offers</h2>
+          <p className="text-xs text-[color:var(--text-dim)] mb-3 -mt-2">
+            Proposed but not yet accepted by the other side.
+          </p>
+          <div className="space-y-3 mb-10">
+            {pending.map(w => <WagerCard key={w.id} w={w} pending />)}
+          </div>
+        </>
+      )}
+
       {/* ============ SETTLED ============ */}
       {settled.length > 0 && (
         <>
@@ -82,19 +95,34 @@ export default async function WagersPage() {
   );
 }
 
-function WagerCard({ w, settled }: { w: Wager; settled?: boolean }) {
+function WagerCard({ w, settled, pending }: { w: Wager; settled?: boolean; pending?: boolean }) {
   const a = w.player_a;
   const b = w.player_b;
   const winnerIsA = w.winner_player_id && a && w.winner_player_id === a.id;
   const winnerIsB = w.winner_player_id && b && w.winner_player_id === b.id;
+  const borderCls = settled
+    ? 'border-line opacity-80'
+    : pending
+      ? 'border-amber-500/40'
+      : 'border-[color:var(--gold)]/50';
+  const statusLabel = settled
+    ? w.status.toUpperCase()
+    : pending
+      ? '⏳ PENDING'
+      : '● ACTIVE';
+  const statusCls = settled
+    ? 'text-[color:var(--text-dim)]'
+    : pending
+      ? 'text-amber-300'
+      : 'gold-bright';
   return (
-    <div className={`rounded-xl border bg-card p-4 sm:p-5 ${settled ? 'border-line opacity-80' : 'border-[color:var(--gold)]/50'}`}>
+    <div className={`rounded-xl border bg-card p-4 sm:p-5 ${borderCls}`}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] uppercase tracking-widest text-[color:var(--text-dim)]">
           {w.terms}
         </span>
-        <span className={`text-xs font-semibold ${settled ? 'text-[color:var(--text-dim)]' : 'gold-bright'}`}>
-          {settled ? w.status.toUpperCase() : '● ACTIVE'}
+        <span className={`text-xs font-semibold ${statusCls}`}>
+          {statusLabel}
         </span>
       </div>
       {w.match_label && (
