@@ -220,7 +220,13 @@ export default function AdminPage() {
                     className="px-2 py-1 rounded bg-card border border-line text-xs"
                   />
                 </div>
-                <div className="flex gap-2 text-xs">
+                <div className="flex gap-2 text-xs flex-wrap">
+                  {w.status === 'pending' && (
+                    <button
+                      onClick={() => api('approve_wager', { wager_id: w.id }).then(refresh)}
+                      className="px-2 py-1 rounded bg-[color:var(--gold)] text-black font-semibold"
+                    >✓ Approve & Post</button>
+                  )}
                   {w.status === 'active' && (
                     <>
                       <button

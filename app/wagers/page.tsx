@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import ProposeWagerForm from './ProposeWagerForm';
 
 export const revalidate = 30;
 
@@ -28,23 +29,27 @@ export default async function WagersPage() {
 
   const wagers = (wagersRaw ?? []) as unknown as Wager[];
   const active = wagers.filter(w => w.status === 'active');
-  const settled = wagers.filter(w => w.status !== 'active');
+  const pending = wagers.filter(w => w.status === 'pending');
+  const settled = wagers.filter(w => w.status !== 'active' && w.status !== 'pending');
 
   const totalTokens = active.reduce((s, w) => s + w.stake_tokens, 0);
 
   return (
     <div>
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-3xl sm:text-4xl font-bold gold-bright">Side Wagers</h1>
         <p className="text-sm text-[color:var(--text-dim)] mt-2 uppercase tracking-widest">
           Tokens only · No real money · Bragging rights forever
         </p>
       </div>
 
+      <ProposeWagerForm />
+
       {/* ============ STATS STRIP ============ */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
-        <Stat label="Active Wagers" value={active.length.toString()} />
+      <div className="grid grid-cols-4 gap-3 mb-8">
+        <Stat label="Active" value={active.length.toString()} />
         <Stat label="Tokens In Play" value={totalTokens.toString()} />
+        <Stat label="Pending" value={pending.length.toString()} />
         <Stat label="Settled" value={settled.length.toString()} />
       </div>
 

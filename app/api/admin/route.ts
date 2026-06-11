@@ -107,6 +107,14 @@ export async function POST(req: NextRequest) {
         if (error) throw error;
         return NextResponse.json({ message: 'wager settled' });
       }
+      case 'approve_wager': {
+        const { wager_id } = body;
+        const { error } = await supabaseAdmin.from('wagers')
+          .update({ status: 'active' })
+          .eq('id', wager_id);
+        if (error) throw error;
+        return NextResponse.json({ message: 'wager approved' });
+      }
       case 'delete_wager': {
         const { wager_id } = body;
         const { error } = await supabaseAdmin.from('wagers').delete().eq('id', wager_id);
