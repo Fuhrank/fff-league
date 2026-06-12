@@ -82,6 +82,9 @@ export default async function WagersPage() {
       {settled.length > 0 && (
         <>
           <h2 className="text-xl font-bold mb-3">📜 Settled</h2>
+          <p className="text-xs text-[color:var(--text-dim)] mb-3 -mt-2">
+            Auto-settled when the linked match ends · 👑 = winner · PUSH = draw (stakes returned)
+          </p>
           <div className="space-y-3">
             {settled.map(w => <WagerCard key={w.id} w={w} settled />)}
           </div>

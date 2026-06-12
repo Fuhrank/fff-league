@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { syncFromFootballData } from '@/lib/football-data';
 import { recomputeScoring } from '@/lib/scoring';
+import { autoSettleWagers } from '@/lib/wagers';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,7 +17,8 @@ export async function GET(req: NextRequest) {
   try {
     const r = await syncFromFootballData();
     const s = await recomputeScoring(supabaseAdmin);
-    return NextResponse.json({ ok: true, ...r, events: s.events, at: new Date().toISOString() });
+    const w = await autoSettleWagers(supabaseAdmin);
+    return NextResponse.json({ ok: true, ...r, events: s.events, wagersSettled: w.settled, wagersPushed: w.pushed, at: new Date().toISOString() });
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: e?.message ?? String(e) }, { status: 500 });
   }

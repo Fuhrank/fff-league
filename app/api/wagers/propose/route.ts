@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       player_a_id, player_b_id, stake_tokens, match_label, pick_a, pick_b, terms,
+      match_id, team_a, team_b,
     } = body;
 
     if (!player_a_id || !player_b_id) {
@@ -30,6 +31,9 @@ export async function POST(req: NextRequest) {
       match_label: (match_label ?? '').toString().slice(0, 200) || null,
       pick_a: (pick_a ?? '').toString().slice(0, 80) || null,
       pick_b: (pick_b ?? '').toString().slice(0, 80) || null,
+      match_id: match_id ? Number(match_id) : null,
+      team_a: team_a ? String(team_a).toUpperCase().slice(0, 3) : null,
+      team_b: team_b ? String(team_b).toUpperCase().slice(0, 3) : null,
       status: 'pending',
     }).select().single();
     if (error) throw error;

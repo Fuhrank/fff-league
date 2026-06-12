@@ -70,6 +70,9 @@ export default function ProposeWagerForm() {
         stake_tokens: Number(stake),
         match_label: matchLabel, pick_a: pickA, pick_b: pickB,
         terms,
+        match_id: selectedMatch?.id ?? null,
+        team_a: selectedMatch?.home_id ?? null,
+        team_b: selectedMatch?.away_id ?? null,
       }),
     });
     const j = await res.json();
