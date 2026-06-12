@@ -39,6 +39,7 @@ export default function ProposeWagerForm() {
   const [matchId, setMatchId] = useState('');
   const [a, setA] = useState('');
   const [b, setB] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
   const [stake, setStake] = useState('20');
   const [pickA, setPickA] = useState('');
   const [pickB, setPickB] = useState('');
@@ -66,20 +67,24 @@ export default function ProposeWagerForm() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        player_a_id: Number(a), player_b_id: Number(b),
+        player_a_id: Number(a),
+        player_b_id: isOpen ? null : Number(b),
+        is_open: isOpen,
         stake_tokens: Number(stake),
-        match_label: matchLabel, pick_a: pickA, pick_b: pickB,
+        match_label: matchLabel,
+        pick_a: pickA,
+        pick_b: isOpen ? null : pickB,
         terms,
         match_id: selectedMatch?.id ?? null,
         team_a: selectedMatch?.home_id ?? null,
-        team_b: selectedMatch?.away_id ?? null,
+        team_b: isOpen ? null : (selectedMatch?.away_id ?? null),
       }),
     });
     const j = await res.json();
     setSubmitting(false);
     if (res.ok) {
       setStatus(`✓ ${j.message}`);
-      setA(''); setB(''); setStake('20'); setMatchId(''); setPickA(''); setPickB('');
+      setA(''); setB(''); setStake('20'); setMatchId(''); setPickA(''); setPickB(''); setIsOpen(false);
     } else {
       setStatus(`✗ ${j.error}`);
     }
@@ -121,7 +126,12 @@ export default function ProposeWagerForm() {
         </div>
         <div>
           <label className="text-[10px] uppercase tracking-widest text-[color:var(--text-dim)]">Opponent</label>
-          <select value={b} onChange={e => setB(e.target.value)} className="w-full mt-1 px-3 py-2 rounded bg-elev border border-line">
+          <select
+            value={isOpen ? '' : b}
+            onChange={e => setB(e.target.value)}
+            disabled={isOpen}
+            className="w-full mt-1 px-3 py-2 rounded bg-elev border border-line disabled:opacity-40"
+          >
             <option value="">Select opponent…</option>
             {players.filter(p => String(p.id) !== a).map(p => (
               <option key={p.id} value={p.id}>{p.name} (G{p.group_no})</option>
@@ -129,6 +139,21 @@ export default function ProposeWagerForm() {
           </select>
         </div>
       </div>
+
+      <label className="flex items-center gap-2 mb-3 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={isOpen}
+          onChange={e => setIsOpen(e.target.checked)}
+          className="h-4 w-4 accent-[color:var(--gold)]"
+        />
+        <span className="text-xs uppercase tracking-widest gold-bright font-bold">
+          🎯 Open to anyone
+        </span>
+        <span className="text-[10px] text-[color:var(--text-dim)]">
+          (post as a challenge; first to accept locks it in)
+        </span>
+      </label>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
         <div>
@@ -173,12 +198,13 @@ export default function ProposeWagerForm() {
             className="w-full mt-1 px-3 py-2 rounded bg-elev border border-line"
           />
         </div>
-        <div>
+        <div className={isOpen ? 'opacity-40 pointer-events-none' : ''}>
           <label className="text-[10px] uppercase tracking-widest text-[color:var(--text-dim)]">
-            {bPlayer?.name || 'Opponent'} pick
+            {bPlayer?.name || 'Opponent'} pick {isOpen && '(auto-assigned on accept)'}
           </label>
           <input
-            value={pickB} onChange={e => setPickB(e.target.value)}
+            value={isOpen ? '' : pickB} onChange={e => setPickB(e.target.value)}
+            disabled={isOpen}
             placeholder="e.g. Morocco 🇲🇦"
             className="w-full mt-1 px-3 py-2 rounded bg-elev border border-line"
           />
@@ -195,10 +221,10 @@ export default function ProposeWagerForm() {
 
       <button
         onClick={submit}
-        disabled={submitting || !a || !b || !stake}
+        disabled={submitting || !a || (!isOpen && !b) || !stake}
         className="w-full px-4 py-2.5 rounded-lg bg-[color:var(--gold)] text-black font-bold disabled:opacity-40"
       >
-        {submitting ? 'Submitting…' : 'Submit for Approval'}
+        {submitting ? 'Submitting…' : (isOpen ? 'Post Open Challenge' : 'Submit for Approval')}
       </button>
 
       {status && (

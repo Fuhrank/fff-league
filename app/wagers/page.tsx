@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import ProposeWagerForm from './ProposeWagerForm';
+import AcceptOpenWager from './AcceptOpenWager';
 
 export const revalidate = 30;
 
@@ -28,9 +29,10 @@ export default async function WagersPage() {
     .order('created_at', { ascending: false });
 
   const wagers = (wagersRaw ?? []) as unknown as Wager[];
+  const openChallenges = wagers.filter(w => w.status === 'open');
   const active = wagers.filter(w => w.status === 'active');
   const pending = wagers.filter(w => w.status === 'pending');
-  const settled = wagers.filter(w => w.status !== 'active' && w.status !== 'pending');
+  const settled = wagers.filter(w => !['active','pending','open'].includes(w.status));
 
   const totalTokens = active.reduce((s, w) => s + w.stake_tokens, 0);
 
@@ -47,11 +49,29 @@ export default async function WagersPage() {
 
       {/* ============ STATS STRIP ============ */}
       <div className="grid grid-cols-4 gap-3 mb-8">
+        <Stat label="Open" value={openChallenges.length.toString()} />
         <Stat label="Active" value={active.length.toString()} />
         <Stat label="Tokens In Play" value={totalTokens.toString()} />
-        <Stat label="Pending" value={pending.length.toString()} />
         <Stat label="Settled" value={settled.length.toString()} />
       </div>
+
+      {/* ============ OPEN CHALLENGES ============ */}
+      {openChallenges.length > 0 && (
+        <>
+          <h2 className="text-xl font-bold mb-3">🎯 Open Challenges</h2>
+          <p className="text-xs text-[color:var(--text-dim)] mb-3 -mt-2">
+            Anyone can accept. Acceptor auto-gets the other team. Admin approval still required.
+          </p>
+          <div className="space-y-3 mb-10">
+            {openChallenges.map(w => (
+              <div key={w.id}>
+                <WagerCard w={w} openChallenge />
+                <AcceptOpenWager wagerId={w.id} proposerId={w.player_a?.id ?? 0} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* ============ ACTIVE ============ */}
       <h2 className="text-xl font-bold mb-3">🔥 Active</h2>
@@ -98,26 +118,32 @@ export default async function WagersPage() {
   );
 }
 
-function WagerCard({ w, settled, pending }: { w: Wager; settled?: boolean; pending?: boolean }) {
+function WagerCard({ w, settled, pending, openChallenge }: { w: Wager; settled?: boolean; pending?: boolean; openChallenge?: boolean }) {
   const a = w.player_a;
   const b = w.player_b;
   const winnerIsA = w.winner_player_id && a && w.winner_player_id === a.id;
   const winnerIsB = w.winner_player_id && b && w.winner_player_id === b.id;
   const borderCls = settled
     ? 'border-line opacity-80'
-    : pending
-      ? 'border-amber-500/40'
-      : 'border-[color:var(--gold)]/50';
+    : openChallenge
+      ? 'border-[color:var(--gold)] ring-1 ring-[color:var(--gold)]/30'
+      : pending
+        ? 'border-amber-500/40'
+        : 'border-[color:var(--gold)]/50';
   const statusLabel = settled
     ? w.status.toUpperCase()
-    : pending
-      ? '⏳ PENDING'
-      : '● ACTIVE';
+    : openChallenge
+      ? '🎯 OPEN'
+      : pending
+        ? '⏳ PENDING'
+        : '● ACTIVE';
   const statusCls = settled
     ? 'text-[color:var(--text-dim)]'
-    : pending
-      ? 'text-amber-300'
-      : 'gold-bright';
+    : openChallenge
+      ? 'gold-bright'
+      : pending
+        ? 'text-amber-300'
+        : 'gold-bright';
   return (
     <div className={`rounded-xl border bg-card p-4 sm:p-5 ${borderCls}`}>
       <div className="flex items-center justify-between mb-2">
@@ -142,7 +168,18 @@ function WagerCard({ w, settled, pending }: { w: Wager; settled?: boolean; pendi
           </div>
           <div className="text-[10px] uppercase tracking-widest text-[color:var(--text-dim)]">Tokens</div>
         </div>
-        <Side player={b} pick={w.pick_b} winner={!!winnerIsB} reverse />
+        {openChallenge && !b ? (
+          <div className="flex-1 min-w-0 text-right">
+            <div className="text-sm sm:text-base font-bold gold-bright animate-pulse">
+              Awaiting acceptor…
+            </div>
+            <div className="text-[10px] uppercase tracking-widest text-[color:var(--text-dim)] mt-0.5">
+              Open seat
+            </div>
+          </div>
+        ) : (
+          <Side player={b} pick={w.pick_b} winner={!!winnerIsB} reverse />
+        )}
       </div>
     </div>
   );
