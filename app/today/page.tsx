@@ -59,12 +59,17 @@ export default async function TodayPage() {
   const now = new Date();
   const { start, end } = easternDayRange(now);
 
-  const [{ data: todayMatches }, { data: upcoming }, { data: teams }] = await Promise.all([
+  const [{ data: todayMatches }, { data: liveAnywhere }, { data: upcoming }, { data: teams }] = await Promise.all([
     supabase
       .from('matches')
       .select('id, stage, status, utc_date, home_team, away_team, home_score, away_score, home_pk, away_pk, duration')
       .gte('utc_date', start.toISOString())
       .lte('utc_date', end.toISOString())
+      .order('utc_date'),
+    supabase
+      .from('matches')
+      .select('id, stage, status, utc_date, home_team, away_team, home_score, away_score, home_pk, away_pk, duration')
+      .in('status', ['IN_PLAY', 'PAUSED'])
       .order('utc_date'),
     supabase
       .from('matches')
@@ -81,9 +86,12 @@ export default async function TodayPage() {
   // Bucket today's matches.
   const isLive = (s: string) => s === 'IN_PLAY' || s === 'PAUSED';
   const isDone = (s: string) => s === 'FINISHED';
-  const liveMatches    = (todayMatches ?? []).filter((m: any) => isLive(m.status));
-  const upcomingToday  = (todayMatches ?? []).filter((m: any) => !isLive(m.status) && !isDone(m.status));
-  const finishedToday  = (todayMatches ?? []).filter((m: any) => isDone(m.status));
+  // LIVE NOW pulls from any-status query so an in-play match still shows even
+  // if it started "yesterday" in ET (late kickoffs running past midnight, etc).
+  const liveMatches    = liveAnywhere ?? [];
+  const liveIds        = new Set(liveMatches.map((m: any) => m.id));
+  const upcomingToday  = (todayMatches ?? []).filter((m: any) => !liveIds.has(m.id) && !isLive(m.status) && !isDone(m.status));
+  const finishedToday  = (todayMatches ?? []).filter((m: any) => !liveIds.has(m.id) && isDone(m.status));
 
   // Pick the next ~6 marquee matches (or first 6 if none flagged).
   const marqueeUpcoming = (upcoming ?? []).filter(

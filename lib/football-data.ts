@@ -75,46 +75,46 @@ export async function syncFromFootballData() {
   if (mErr) throw new Error(`bulk upsert matches: ${mErr.message}`);
   const upserted = matchRows.length;
 
-  // 3) Goals — only for FINISHED matches that don't have all their goals yet.
-  // Cap detail-fetch per sync to stay under Football-Data rate limit (10 req/min)
-  // and Vercel's 60s function ceiling.
+  // 3) Goals — derive +1-per-goal credits from fullTime totals.
+  // Football-Data free tier no longer returns scorer arrays, so we synthesize
+  // one goal-row per goal. Scorer is null; minute is a synthetic 1..N per team
+  // so the (match_id, team_id, scorer, minute, is_penalty_shootout) unique
+  // constraint dedupes correctly across syncs.
+  //
+  // Trade-off: we can't distinguish own goals at this tier, so OG goals are
+  // credited to the scoring team (rare — <2% of WC goals historically).
+  // PK-shootout goals are correctly excluded because score.fullTime does NOT
+  // include shootout goals (those are in score.penalties).
   let goalRows = 0;
-  const finishedNeedingGoals: any[] = [];
-  for (const m of matches) {
-    if (m.status !== 'FINISHED') continue;
+  const finishedForGoals = matches.filter(m => m.status === 'FINISHED');
+  const allGoalRows: any[] = [];
+  for (const m of finishedForGoals) {
+    const home = teamCode(m.homeTeam);
+    const away = teamCode(m.awayTeam);
+    if (!home || !away) continue;
     const ft = m.score?.fullTime ?? {};
-    const expected = (ft.home ?? 0) + (ft.away ?? 0);
-    if (expected === 0) continue;
-    const { count } = await supabaseAdmin
-      .from('goals')
-      .select('id', { count: 'exact', head: true })
-      .eq('match_id', m.id);
-    if ((count ?? 0) < expected) finishedNeedingGoals.push(m);
+    const hg = Math.max(0, ft.home ?? 0);
+    const ag = Math.max(0, ft.away ?? 0);
+    for (let i = 1; i <= hg; i++) {
+      allGoalRows.push({
+        match_id: m.id, team_id: home, scorer: null, minute: i,
+        is_own_goal: false, is_penalty_shootout: false,
+      });
+    }
+    for (let i = 1; i <= ag; i++) {
+      allGoalRows.push({
+        match_id: m.id, team_id: away, scorer: null, minute: i,
+        is_own_goal: false, is_penalty_shootout: false,
+      });
+    }
   }
-  // Per-sync cap: at most 6 detail fetches so we never exceed FD's 10/min
-  // (we already used 1 for the list call).
-  for (const m of finishedNeedingGoals.slice(0, 6)) {
-    const home = teamCode(m.homeTeam)!;
-    const detailRes = await fetch(`${FD_BASE}/matches/${m.id}`, {
-      headers: { 'X-Auth-Token': token }, cache: 'no-store',
-    });
-    if (!detailRes.ok) continue;
-    const detail = await detailRes.json();
-    const goals: any[] = detail?.match?.goals ?? detail?.goals ?? [];
-    if (!goals.length) continue;
-    const rows = goals.map((g: any) => ({
-      match_id: m.id,
-      team_id: teamCode(g.team) ?? home,
-      scorer: g.scorer?.name ?? null,
-      minute: g.minute ?? null,
-      is_own_goal: g.type === 'OWN',
-      is_penalty_shootout: g.type === 'PENALTY_SHOOTOUT',
-    }));
-    await supabaseAdmin.from('goals').upsert(rows, {
+  if (allGoalRows.length > 0) {
+    const { error: gErr } = await supabaseAdmin.from('goals').upsert(allGoalRows, {
       onConflict: 'match_id,team_id,scorer,minute,is_penalty_shootout',
       ignoreDuplicates: true,
     });
-    goalRows += rows.length;
+    if (gErr) throw new Error(`upsert goals: ${gErr.message}`);
+    goalRows = allGoalRows.length;
   }
 
   return { upserted, goalRows };
