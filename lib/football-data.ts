@@ -97,13 +97,13 @@ export async function syncFromFootballData() {
     const ag = Math.max(0, ft.away ?? 0);
     for (let i = 1; i <= hg; i++) {
       allGoalRows.push({
-        match_id: m.id, team_id: home, scorer: null, minute: i,
+        match_id: m.id, team_id: home, scorer: `#${i}`, minute: i,
         is_own_goal: false, is_penalty_shootout: false,
       });
     }
     for (let i = 1; i <= ag; i++) {
       allGoalRows.push({
-        match_id: m.id, team_id: away, scorer: null, minute: i,
+        match_id: m.id, team_id: away, scorer: `#${i}`, minute: i,
         is_own_goal: false, is_penalty_shootout: false,
       });
     }
