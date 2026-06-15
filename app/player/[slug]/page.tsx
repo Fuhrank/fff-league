@@ -33,7 +33,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ slug: s
 
   return (
     <div>
-      <Link href="/" className="text-sm text-[color:var(--text-dim)] hover:gold-bright">← Leaderboard</Link>
+      <Link href="/leaderboard" className="text-sm text-[color:var(--text-dim)] hover:gold-bright">← Leaderboard</Link>
       <div className="mt-3 mb-8 flex items-end justify-between">
         <h1 className="text-3xl sm:text-4xl font-bold">{player.name}</h1>
         <div className="text-right">
