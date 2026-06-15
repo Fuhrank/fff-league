@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { loadLeaderboard, type LeaderboardRow } from '@/lib/scoring';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata = {
   title: 'Leaderboard — FFF League',
@@ -26,7 +27,7 @@ export default async function LeaderboardPage() {
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold">Leaderboard</h1>
           <p className="text-sm text-[color:var(--text-dim)] mt-1">
-            Updated every 15 min during match days. Ties broken by total goals.
+            Live every couple minutes during match days. Ties broken by total goals.
           </p>
         </div>
       </div>
