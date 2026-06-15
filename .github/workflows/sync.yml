@@ -1,0 +1,37 @@
+name: Sync FFF League
+
+# Hits /api/cron/sync to refresh scores, points, and wagers.
+# Vercel Hobby cron is capped at 1 run/day, so we drive faster refreshes from here.
+on:
+  schedule:
+    # Every 5 minutes during likely match window (10:00–23:00 UTC)
+    - cron: "*/5 10-23 * * *"
+    # Every 30 minutes overnight (00:00–09:59 UTC) as a safety net
+    - cron: "*/30 0-9 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: fff-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Hit /api/cron/sync
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -e
+          echo "Triggering sync at $(date -u +%FT%TZ)"
+          HTTP_CODE=$(curl -sS -o /tmp/body.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://fff-league.vercel.app/api/cron/sync" || true)
+          echo "HTTP ${HTTP_CODE}"
+          head -c 2000 /tmp/body.json || true
+          echo
+          if [ "${HTTP_CODE}" != "200" ]; then
+            echo "Sync failed (HTTP ${HTTP_CODE})"
+            exit 1
+          fi
