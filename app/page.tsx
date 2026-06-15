@@ -14,9 +14,39 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ============ BRACKET + SIDE BANNER ============ */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-4 mb-6">
-        <div className="rounded-2xl border border-line bg-card overflow-hidden shadow-2xl">
+      {/* ============ SIDE BANNERS + BRACKET + WAGERS ============ */}
+      <div className="grid grid-cols-1 lg:grid-cols-[180px_1fr_220px] gap-4 mb-6">
+        {/* Left: upcoming sport leagues */}
+        <aside className="flex flex-col gap-3 order-2 lg:order-1">
+          {[
+            { sport: 'NFL',  emoji: '🏈', name: 'Fantasy Football',  drop: 'Sept 2026', accent: 'from-emerald-500/15' },
+            { sport: 'NBA',  emoji: '🏀', name: 'Fantasy Hoops',     drop: 'Oct 2026',  accent: 'from-orange-500/15' },
+            { sport: 'MLB',  emoji: '⚾', name: 'Fantasy Diamond',   drop: 'Apr 2027',  accent: 'from-sky-500/15' },
+          ].map(b => (
+            <div
+              key={b.sport}
+              className={`rounded-xl border border-line bg-gradient-to-br ${b.accent} to-card p-3 shadow-md flex flex-col justify-between min-h-[110px] lg:min-h-0 lg:flex-1`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-2xl">{b.emoji}</span>
+                <span className="text-[9px] uppercase tracking-widest text-[color:var(--text-dim)] bg-elev px-2 py-0.5 rounded-full border border-line">
+                  Coming Soon
+                </span>
+              </div>
+              <div className="mt-2">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-[color:var(--text-dim)]">{b.sport}</div>
+                <div className="font-bold gold-bright leading-tight text-sm">{b.name}</div>
+              </div>
+              <div className="mt-2 pt-2 border-t border-line">
+                <div className="text-[9px] uppercase tracking-widest text-[color:var(--text-dim)]">Drops</div>
+                <div className="text-xs font-semibold text-white">{b.drop}</div>
+              </div>
+            </div>
+          ))}
+        </aside>
+
+        {/* Center: bracket */}
+        <div className="rounded-2xl border border-line bg-card overflow-hidden shadow-2xl order-1 lg:order-2">
           <img
             src="/bracket-2026.jpg"
             alt="2026 FIFA World Cup Bracket — 48 teams, 104 matches, 1 champion"
@@ -24,8 +54,8 @@ export default function HomePage() {
           />
         </div>
 
-        {/* ============ SIDE WAGERS BANNER ============ */}
-        <aside className="rounded-xl border border-[color:var(--gold)] bg-card p-4 flex flex-col justify-center text-center shadow-lg">
+        {/* Right: wagers banner */}
+        <aside className="rounded-xl border border-[color:var(--gold)] bg-card p-4 flex flex-col justify-center text-center shadow-lg order-3">
           <div className="text-[10px] uppercase tracking-[0.25em] text-[color:var(--text-dim)] mb-2">
             🎲 Place Your Bets
           </div>

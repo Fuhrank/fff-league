@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import NavMenu from "./NavMenu";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -20,16 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[color:var(--text-dim)]">Frank's Fantasy Fútbol</span>
               </div>
             </Link>
-            <nav className="flex gap-4 text-sm">
-              <Link href="/" className="hover:gold-bright">Home</Link>
-              <Link href="/leaderboard" className="hover:gold-bright">Leaderboard</Link>
-              <Link href="/draft" className="hover:gold-bright">Draft</Link>
-              <Link href="/rules" className="hover:gold-bright">Rules</Link>
-              <Link href="/today" className="hover:gold-bright">Today</Link>
-              <Link href="/odds" className="hover:gold-bright">Odds</Link>
-              <Link href="/wagers" className="hover:gold-bright">Wagers</Link>
-              <Link href="/admin" className="hover:gold-bright text-[color:var(--text-dim)]">Admin</Link>
-            </nav>
+            <NavMenu />
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
