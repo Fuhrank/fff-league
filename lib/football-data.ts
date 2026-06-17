@@ -10,9 +10,21 @@ import { supabaseAdmin } from './supabase';
 const FD_BASE = 'https://api.football-data.org/v4';
 const COMPETITION = process.env.FOOTBALL_DATA_COMPETITION || 'WC';
 
+// Football-Data occasionally renames TLAs mid-tournament (e.g. URY→URU on
+// 2026-06). Existing rows in `teams` and FK references in `picks` use the
+// original TLA, and the `(fd_id)` unique index makes a TLA swap a hard
+// duplicate-key failure on every sync. Normalize back to the canonical code
+// here so the rest of the pipeline stays stable.
+const TLA_ALIASES: Record<string, string> = {
+  URU: 'URY', // Uruguay — FD renamed 2026-06; picks/teams already key on URY
+};
+
 function teamCode(fdTeam: { tla?: string; name?: string }): string | null {
   // Football-Data exposes "tla" (3-letter code) for national teams.
-  if (fdTeam?.tla) return fdTeam.tla.toUpperCase();
+  if (fdTeam?.tla) {
+    const raw = fdTeam.tla.toUpperCase();
+    return TLA_ALIASES[raw] ?? raw;
+  }
   return null;
 }
 
