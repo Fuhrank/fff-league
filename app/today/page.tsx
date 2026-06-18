@@ -1,7 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import AutoRefresh from './AutoRefresh';
 
-export const revalidate = 20;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const ET_TZ = 'America/New_York';
 
