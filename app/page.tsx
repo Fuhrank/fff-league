@@ -1,6 +1,24 @@
+import Link from 'next/link';
+
 export default function HomePage() {
   return (
     <div>
+      {/* ============ OWNER'S LEAGUE UMBRELLA ============ */}
+      <div className="mb-8 rounded-2xl border border-[color:var(--gold)] bg-card p-5 sm:p-6 text-center shadow-lg">
+        <div className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-[color:var(--text-dim)] mb-2">
+          Welcome to
+        </div>
+        <h2 className="text-2xl sm:text-4xl font-extrabold gold-bright tracking-tight">
+          Fantasy Owner&apos;s League
+        </h2>
+        <div className="mx-auto h-px w-24 bg-[color:var(--gold)] opacity-60 my-3" />
+        <ul className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-8 text-sm sm:text-base text-white font-semibold">
+          <li>🏆 Pick your teams</li>
+          <li>📊 Track your points</li>
+          <li>👑 Win the trophy!</li>
+        </ul>
+      </div>
+
       {/* ============ HERO ============ */}
       <div className="mb-8 flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
         <img src="/logo.png" alt="FFF League" className="h-28 w-28 sm:h-32 sm:w-32" />
@@ -19,30 +37,41 @@ export default function HomePage() {
         {/* Left: upcoming sport leagues */}
         <aside className="flex flex-col gap-3 order-2 lg:order-1">
           {[
-            { sport: 'NFL',  emoji: '🏈', name: 'Fantasy Football',  drop: 'Sept 2026', accent: 'from-emerald-500/15' },
-            { sport: 'NBA',  emoji: '🏀', name: 'Fantasy Hoops',     drop: 'Oct 2026',  accent: 'from-orange-500/15' },
-            { sport: 'MLB',  emoji: '⚾', name: 'Fantasy Diamond',   drop: 'Apr 2027',  accent: 'from-sky-500/15' },
-          ].map(b => (
-            <div
-              key={b.sport}
-              className={`rounded-xl border border-line bg-gradient-to-br ${b.accent} to-card p-3 shadow-md flex flex-col justify-between min-h-[110px] lg:min-h-0 lg:flex-1`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-2xl">{b.emoji}</span>
-                <span className="text-[9px] uppercase tracking-widest text-[color:var(--text-dim)] bg-elev px-2 py-0.5 rounded-full border border-line">
-                  Coming Soon
-                </span>
+            { sport: 'NFL',  emoji: '🏈', name: 'Fantasy Football',  drop: 'Sept 2026', accent: 'from-emerald-500/15', href: '/nfl/rules' },
+            { sport: 'NBA',  emoji: '🏀', name: 'Fantasy Hoops',     drop: 'Oct 2026',  accent: 'from-orange-500/15', href: null },
+            { sport: 'MLB',  emoji: '⚾', name: 'Fantasy Diamond',   drop: 'Apr 2027',  accent: 'from-sky-500/15', href: null },
+          ].map(b => {
+            const card = (
+              <div
+                className={`rounded-xl border border-line bg-gradient-to-br ${b.accent} to-card p-3 shadow-md flex flex-col justify-between min-h-[110px] lg:min-h-0 lg:flex-1 ${b.href ? 'hover:border-[color:var(--gold)] transition-colors cursor-pointer' : ''}`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl">{b.emoji}</span>
+                  <span className="text-[9px] uppercase tracking-widest text-[color:var(--text-dim)] bg-elev px-2 py-0.5 rounded-full border border-line">
+                    Coming Soon
+                  </span>
+                </div>
+                <div className="mt-2">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-[color:var(--text-dim)]">{b.sport}</div>
+                  <div className="font-bold gold-bright leading-tight text-sm">{b.name}</div>
+                </div>
+                <div className="mt-2 pt-2 border-t border-line">
+                  <div className="text-[9px] uppercase tracking-widest text-[color:var(--text-dim)]">Drops</div>
+                  <div className="text-xs font-semibold text-white">{b.drop}</div>
+                  {b.href && (
+                    <div className="text-[9px] uppercase tracking-widest gold-bright font-bold mt-1">
+                      View Rules →
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="mt-2">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-[color:var(--text-dim)]">{b.sport}</div>
-                <div className="font-bold gold-bright leading-tight text-sm">{b.name}</div>
-              </div>
-              <div className="mt-2 pt-2 border-t border-line">
-                <div className="text-[9px] uppercase tracking-widest text-[color:var(--text-dim)]">Drops</div>
-                <div className="text-xs font-semibold text-white">{b.drop}</div>
-              </div>
-            </div>
-          ))}
+            );
+            return b.href ? (
+              <Link key={b.sport} href={b.href} className="block">{card}</Link>
+            ) : (
+              <div key={b.sport}>{card}</div>
+            );
+          })}
         </aside>
 
         {/* Center: bracket */}
