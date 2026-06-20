@@ -4,8 +4,8 @@ import NavMenu from "./NavMenu";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FFF League — Frank's Fantasy Fútbol",
-  description: "48 teams. 12 owners. One champion.",
+  title: "Owner's League — Draft the Teams, Own the Tournament",
+  description: "Draft the Teams, Own the Tournament. 48 teams. 12 owners. One champion.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -15,10 +15,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="border-b border-line bg-elev">
           <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
-              <img src="/logo.png" alt="FFF League" className="h-10 w-10 sm:h-12 sm:w-12" />
+              <img src="/logo.png" alt="Owner's League" className="h-10 w-10 sm:h-12 sm:w-12" />
               <div className="flex flex-col leading-tight">
-                <span className="title-treatment text-xl sm:text-2xl">FFF LEAGUE</span>
-                <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[color:var(--text-dim)]">Frank's Fantasy Fútbol</span>
+                <span className="title-treatment text-xl sm:text-2xl">OWNER&apos;S LEAGUE</span>
+                <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[color:var(--text-dim)]">Draft the Teams, Own the Tournament</span>
               </div>
             </Link>
             <NavMenu />
