@@ -1,16 +1,30 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Inter, Inter_Tight } from "next/font/google";
 import NavMenu from "./NavMenu";
 import "./globals.css";
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const interTight = Inter_Tight({
+  subsets: ["latin"],
+  weight: ["600", "700", "800", "900"],
+  variable: "--font-display",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Owner's League — Draft the Teams, Own the League",
-  description: "Draft the Teams, Own the League. 48 teams. 12 owners. One champion.",
+  description: "Draft the Teams, Own the League. 48 teams. 20 owners. One champion.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${interTight.variable}`}>
       <body className="min-h-screen">
         <header className="border-b border-line bg-elev">
           <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
@@ -26,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
         <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
         <footer className="mx-auto max-w-5xl px-4 py-8 text-center text-xs text-[color:var(--text-dim)]">
-          <p>48 teams. 12 owners. One champion.</p>
+          <p>48 teams. 20 owners. One champion.</p>
         </footer>
       </body>
     </html>

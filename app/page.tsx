@@ -1,34 +1,13 @@
 import Link from 'next/link';
+import Hero from './Hero';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default function HomePage() {
   return (
     <div>
-      {/* ============ OWNER'S LEAGUE UMBRELLA ============ */}
-      <div className="mb-8 rounded-2xl border border-[color:var(--gold)] bg-card p-5 sm:p-6 text-center shadow-lg">
-        <div className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-[color:var(--text-dim)] mb-2">
-          Welcome to
-        </div>
-        <h2 className="text-2xl sm:text-4xl font-extrabold gold-bright tracking-tight">
-          Owner&apos;s League
-        </h2>
-        <div className="mx-auto h-px w-24 bg-[color:var(--gold)] opacity-60 my-3" />
-        <p className="text-base sm:text-xl font-bold text-white uppercase tracking-[0.15em]">
-          Draft the Teams, Own the League
-        </p>
-      </div>
-
-      {/* ============ HERO ============ */}
-      <div className="mb-8 flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
-        <img src="/logo.png" alt="Owner's League" className="h-28 w-28 sm:h-32 sm:w-32" />
-        <div>
-          <h1 className="text-4xl sm:text-6xl font-extrabold gold-bright tracking-tight leading-none">
-            Owner&apos;s League
-          </h1>
-          <p className="text-sm sm:text-base text-[color:var(--text-dim)] mt-2 uppercase tracking-widest">
-            12 owners • 48 teams • 1 World Cup
-          </p>
-        </div>
-      </div>
+      <Hero />
 
       {/* ============ FEATURED SPORT BANNERS (center, glow on hover) ============ */}
       <div className="mb-8">

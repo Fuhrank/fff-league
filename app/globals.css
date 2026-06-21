@@ -15,8 +15,14 @@
 html, body {
   background: var(--bg);
   color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.025em;
 }
 
 .gold { color: var(--gold); }
@@ -26,10 +32,32 @@ html, body {
 .border-line { border-color: var(--border); }
 
 .title-treatment {
+  font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-weight: 900;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 60%, var(--gold-dim) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* Hero gradient mesh — slow drift */
+@keyframes mesh-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(40px, 30px) scale(1.1); }
+}
+@keyframes mesh-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-30px, -40px) scale(1.15); }
+}
+@keyframes mesh-c {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50%      { transform: translate(-45%, -55%) scale(1.1); }
+}
+.animate-mesh-a { animation: mesh-a 14s ease-in-out infinite; }
+.animate-mesh-b { animation: mesh-b 16s ease-in-out infinite; }
+.animate-mesh-c { animation: mesh-c 18s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-mesh-a, .animate-mesh-b, .animate-mesh-c { animation: none; }
 }
