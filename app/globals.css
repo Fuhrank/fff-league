@@ -20,6 +20,32 @@ html, body {
   text-rendering: optimizeLegibility;
 }
 
+/* Ambient gradient backdrop — fills empty space with subtle motion */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 15% 10%, rgba(212,175,55,0.10), transparent 60%),
+    radial-gradient(50% 40% at 90% 30%, rgba(16,185,129,0.06), transparent 65%),
+    radial-gradient(60% 50% at 50% 90%, rgba(56,189,248,0.06), transparent 65%),
+    radial-gradient(40% 30% at 80% 80%, rgba(249,115,22,0.05), transparent 65%);
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image:
+    linear-gradient(to right, #fff 1px, transparent 1px),
+    linear-gradient(to bottom, #fff 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
 .font-display {
   font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   letter-spacing: 0.02em;

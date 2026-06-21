@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <NavMenu />
           </div>
         </header>
-        <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+        <main className="mx-auto max-w-5xl px-4 py-4 sm:py-6">{children}</main>
         <footer className="mx-auto max-w-5xl px-4 py-8 text-center text-xs text-[color:var(--text-dim)]">
           <p>48 teams. 20 owners. One champion.</p>
         </footer>
