@@ -93,12 +93,12 @@ export default async function Hero() {
         </div>
 
         {/* Wordmark */}
-        <h1 className="font-display mt-5 text-5xl sm:text-7xl font-extrabold tracking-tight leading-[0.95] title-treatment">
-          Owner&apos;s League
+        <h1 className="font-display mt-5 text-6xl sm:text-8xl tracking-wide leading-[1.1] pb-2 title-treatment">
+          OWNER&apos;S LEAGUE
         </h1>
 
         {/* Tagline */}
-        <p className="mt-4 text-base sm:text-xl font-semibold text-white/90 uppercase tracking-[0.2em]">
+        <p className="mt-2 text-base sm:text-xl font-semibold text-white/90 uppercase tracking-[0.25em]">
           Draft the Teams, <span className="gold-bright">Own</span> the League
         </p>
 

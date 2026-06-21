@@ -22,7 +22,8 @@ html, body {
 
 .font-display {
   font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  letter-spacing: -0.025em;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
 }
 
 .gold { color: var(--gold); }
@@ -33,12 +34,14 @@ html, body {
 
 .title-treatment {
   font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 900;
-  letter-spacing: -0.03em;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
   background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 60%, var(--gold-dim) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  padding-bottom: 0.1em;
 }
 
 /* Hero gradient mesh — slow drift */

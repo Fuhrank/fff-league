@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Inter, Inter_Tight } from "next/font/google";
+import { Inter, Bebas_Neue } from "next/font/google";
 import NavMenu from "./NavMenu";
 import "./globals.css";
 
@@ -10,9 +10,9 @@ const inter = Inter({
   display: "swap",
 });
 
-const interTight = Inter_Tight({
+const bebas = Bebas_Neue({
   subsets: ["latin"],
-  weight: ["600", "700", "800", "900"],
+  weight: ["400"],
   variable: "--font-display",
   display: "swap",
 });
@@ -24,8 +24,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${interTight.variable}`}>
-      <body className="min-h-screen">
+    <html lang="en">
+      <body className={`${inter.variable} ${bebas.variable} min-h-screen`}>
         <header className="border-b border-line bg-elev">
           <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
