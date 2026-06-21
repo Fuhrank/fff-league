@@ -13,7 +13,7 @@ export default function HomePage() {
         </h2>
         <div className="mx-auto h-px w-24 bg-[color:var(--gold)] opacity-60 my-3" />
         <p className="text-base sm:text-xl font-bold text-white uppercase tracking-[0.15em]">
-          Draft the Teams, Own the Tournament
+          Draft the Teams, Own the League
         </p>
       </div>
 
@@ -138,7 +138,7 @@ export default function HomePage() {
         <p className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight">
           <span className="text-white">Draft the Teams, </span>
           <span className="gold-bright">Own</span>
-          <span className="text-white"> the Tournament</span>
+          <span className="text-white"> the League</span>
         </p>
         <div className="mt-6 mx-auto h-px w-32 bg-[color:var(--gold)] opacity-60" />
         <p className="mt-6 text-xs sm:text-sm text-[color:var(--text-dim)] uppercase tracking-[0.3em]">

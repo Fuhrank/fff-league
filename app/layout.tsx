@@ -4,8 +4,8 @@ import NavMenu from "./NavMenu";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Owner's League — Draft the Teams, Own the Tournament",
-  description: "Draft the Teams, Own the Tournament. 48 teams. 12 owners. One champion.",
+  title: "Owner's League — Draft the Teams, Own the League",
+  description: "Draft the Teams, Own the League. 48 teams. 12 owners. One champion.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <img src="/logo.png" alt="Owner's League" className="h-10 w-10 sm:h-12 sm:w-12" />
               <div className="flex flex-col leading-tight">
                 <span className="title-treatment text-xl sm:text-2xl">OWNER&apos;S LEAGUE</span>
-                <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[color:var(--text-dim)]">Draft the Teams, Own the Tournament</span>
+                <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[color:var(--text-dim)]">Draft the Teams, Own the League</span>
               </div>
             </Link>
             <NavMenu />
