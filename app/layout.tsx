@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="border-b border-line bg-elev">
           <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
-              <img src="/logo-v2.png" alt="Owner's League" className="h-10 w-10 sm:h-12 sm:w-12" />
+              <img src="/logo-v2.png" alt="Owner's League" className="h-12 w-12 sm:h-14 sm:w-14" />
               <div className="flex flex-col leading-tight">
                 <span className="title-treatment text-xl sm:text-2xl">OWNER&apos;S LEAGUE</span>
                 <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[color:var(--text-dim)]">Draft the Teams, Own the League</span>

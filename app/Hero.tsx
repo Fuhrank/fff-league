@@ -88,7 +88,7 @@ export default async function Hero() {
           <img
             src="/logo-v2.png"
             alt="Owner's League"
-            className="h-24 w-24 sm:h-32 sm:w-32 drop-shadow-[0_0_24px_rgba(212,175,55,0.45)]"
+            className="h-28 w-28 sm:h-40 sm:w-40 drop-shadow-[0_0_24px_rgba(212,175,55,0.45)]"
           />
         </div>
 
