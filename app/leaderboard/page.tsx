@@ -23,7 +23,7 @@ export default async function LeaderboardPage() {
   return (
     <div>
       <div className="mb-6 flex items-center gap-5">
-        <img src="/logo-v4.png" alt="Owner's League" className="hidden sm:block h-32 w-32" />
+        <img src="/logo-v5.png" alt="Owner's League" className="hidden sm:block h-32 w-32" />
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold">Leaderboard</h1>
           <p className="text-sm text-[color:var(--text-dim)] mt-1">

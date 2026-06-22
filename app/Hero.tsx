@@ -86,7 +86,7 @@ export default async function Hero() {
         {/* Logo */}
         <div className="mt-6 flex justify-center">
           <img
-            src="/logo-v4.png"
+            src="/logo-v5.png"
             alt="Owner's League"
             className="h-36 w-36 sm:h-52 sm:w-52 drop-shadow-[0_0_24px_rgba(212,175,55,0.45)]"
           />
