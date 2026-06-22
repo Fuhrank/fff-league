@@ -28,11 +28,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.variable} ${bebas.variable} min-h-screen`}>
         <header className="border-b border-line bg-elev">
           <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3">
-              <img src="/logo-v5.png" alt="Owner's League" className="h-16 w-16 sm:h-20 sm:w-20" />
-              <div className="flex flex-col leading-tight">
-                <span className="title-treatment text-xl sm:text-2xl">OWNER&apos;S LEAGUE</span>
-                <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[color:var(--text-dim)]">Draft the Teams, Own the League</span>
+            <Link href="/" className="flex items-center gap-3 min-w-0 flex-1 sm:flex-initial">
+              <img src="/logo-v5.png" alt="Owner's League" className="h-12 w-12 sm:h-20 sm:w-20 shrink-0" />
+              <div className="flex flex-col leading-tight min-w-0">
+                <span className="title-treatment text-lg sm:text-2xl">OWNER&apos;S LEAGUE</span>
+                <span className="hidden sm:inline text-[10px] sm:text-xs uppercase tracking-widest text-[color:var(--text-dim)]">Draft the Teams, Own the League</span>
               </div>
             </Link>
             <NavMenu />

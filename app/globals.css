@@ -32,29 +32,30 @@ body::before {
   z-index: -2;
   pointer-events: none;
   background:
-    /* Fine grass-blade flecks (top layer, sharp) */
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='2.4' numOctaves='2' seed='7'/><feColorMatrix values='0 0 0 0 0.05  0 0 0 0 0.32  0 0 0 0 0.12  0 0 0 1.2 -0.55'/></filter><rect width='100%25' height='100%25' filter='url(%23b)' opacity='0.55'/></svg>"),
-    /* Organic clumpy turf shading (bigger, softer) */
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='t'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 0.04  0 0 0 0 0.28  0 0 0 0 0.12  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23t)'/></svg>"),
-    /* Vertical streaks — fake blade direction */
+    /* Fine grass-blade flecks — high contrast */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='3.0' numOctaves='2' seed='9'/><feColorMatrix values='0 0 0 0 0.08  0 0 0 0 0.45  0 0 0 0 0.18  0 0 0 1.8 -0.7'/></filter><rect width='100%25' height='100%25' filter='url(%23b)' opacity='0.9'/></svg>"),
+    /* Organic clumpy turf shading — bigger patches */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='800'><filter id='t'><feTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='4' seed='3'/><feColorMatrix values='0 0 0 0 0.02  0 0 0 0 0.22  0 0 0 0 0.09  0 0 0 0.85 0'/></filter><rect width='100%25' height='100%25' filter='url(%23t)'/></svg>"),
+    /* Vertical blade-direction streaks */
     repeating-linear-gradient(
       90deg,
-      rgba(0,0,0,0.06) 0px,
-      rgba(0,0,0,0.06) 1px,
-      rgba(255,255,255,0.04) 1px,
-      rgba(255,255,255,0.04) 2px,
+      rgba(0,0,0,0.10) 0px,
+      rgba(0,0,0,0.10) 1px,
+      rgba(255,255,255,0.06) 1px,
+      rgba(255,255,255,0.06) 2px,
       transparent 2px,
       transparent 4px
     ),
-    /* Mowing stripes — softer contrast now that texture sits on top */
+    /* Mowing stripes — base */
     repeating-linear-gradient(
       0deg,
-      #1f6630 0px,
-      #1f6630 110px,
-      #2c8a3d 110px,
-      #2c8a3d 220px
+      #1a5a2a 0px,
+      #1a5a2a 120px,
+      #2c8a3d 120px,
+      #2c8a3d 240px
     );
-  background-size: 220px 220px, 600px 600px, auto, auto;
+  background-size: 180px 180px, 800px 800px, auto, auto;
+  background-blend-mode: overlay, multiply, normal, normal;
 }
 
 /* Layer 2: white field lines + vignette */
