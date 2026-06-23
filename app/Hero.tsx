@@ -46,7 +46,13 @@ export default async function Hero() {
   ]);
 
   const totalToday = todayMatches?.length ?? 0;
-  const liveCount = (liveAny?.length ?? 0) + (todayMatches?.filter(m => m.status === 'IN_PLAY' || m.status === 'PAUSED').length ?? 0);
+  // Dedupe live matches across the two queries (POR-UZB hits both).
+  const liveIds = new Set<number>();
+  for (const m of liveAny ?? []) liveIds.add(m.id);
+  for (const m of todayMatches ?? []) {
+    if (m.status === 'IN_PLAY' || m.status === 'PAUSED') liveIds.add(m.id);
+  }
+  const liveCount = liveIds.size;
   const nextMatch = todayMatches?.find(m => m.status === 'SCHEDULED' || m.status === 'TIMED');
   const nextTime = nextMatch ? formatET(new Date(nextMatch.utc_date)) : null;
 
@@ -86,7 +92,7 @@ export default async function Hero() {
         {/* Logo */}
         <div className="mt-6 flex justify-center">
           <img
-            src="/logo-home-v2.png"
+            src="/logo-home-v3.png"
             alt="Owner's League"
             className="h-72 w-72 sm:h-[26rem] sm:w-[26rem] drop-shadow-[0_0_36px_rgba(212,175,55,0.5)]"
           />
