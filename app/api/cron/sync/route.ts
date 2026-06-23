@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { syncFromFootballData } from '@/lib/football-data';
+import { syncFromEspn } from '@/lib/espn-data';
 import { recomputeScoring } from '@/lib/scoring';
 import { autoSettleWagers } from '@/lib/wagers';
 
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
   try {
-    const r = await syncFromFootballData();
+    const r = await syncFromEspn();
     const s = await recomputeScoring(supabaseAdmin);
     const w = await autoSettleWagers(supabaseAdmin);
     return NextResponse.json({ ok: true, ...r, events: s.events, wagersSettled: w.settled, wagersPushed: w.pushed, at: new Date().toISOString() });
