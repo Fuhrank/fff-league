@@ -1,18 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #1a5a2a;
-  --bg-elev: #141414;
-  --bg-card: #1a1a1a;
-  --border: #2a2a2a;
+  --bg: #1f3a2e;            /* Matte pine green */
+  --bg-elev: #18221c;
+  --bg-card: #1a2620;
+  --border: #2a3a32;
   --text: #f5f5f5;
-  --text-dim: #a3a3a3;
+  --text-dim: #b8c4bd;
   --gold: #d4af37;
   --gold-bright: #f4cf4a;
   --gold-dim: #8a7028;
-  --grass-dark: #1a5a2a;
-  --grass-mid: #2a7a3a;
-  --grass-light: #3a9a4a;
 }
 
 html, body {
@@ -23,8 +20,7 @@ html, body {
   text-rendering: optimizeLegibility;
 }
 
-/* ===== Soccer-field backdrop ===== */
-/* Layer 1: grass blades + turbulence + mowing stripes */
+/* ===== Matte pine green backdrop with subtle organic noise ===== */
 body::before {
   content: "";
   position: fixed;
@@ -32,54 +28,24 @@ body::before {
   z-index: -2;
   pointer-events: none;
   background:
-    /* Fine grass-blade flecks — high contrast */
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='3.0' numOctaves='2' seed='9'/><feColorMatrix values='0 0 0 0 0.08  0 0 0 0 0.45  0 0 0 0 0.18  0 0 0 1.8 -0.7'/></filter><rect width='100%25' height='100%25' filter='url(%23b)' opacity='0.9'/></svg>"),
-    /* Organic clumpy turf shading — bigger patches */
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='800'><filter id='t'><feTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='4' seed='3'/><feColorMatrix values='0 0 0 0 0.02  0 0 0 0 0.22  0 0 0 0 0.09  0 0 0 0.85 0'/></filter><rect width='100%25' height='100%25' filter='url(%23t)'/></svg>"),
-    /* Vertical blade-direction streaks */
-    repeating-linear-gradient(
-      90deg,
-      rgba(0,0,0,0.10) 0px,
-      rgba(0,0,0,0.10) 1px,
-      rgba(255,255,255,0.06) 1px,
-      rgba(255,255,255,0.06) 2px,
-      transparent 2px,
-      transparent 4px
-    ),
-    /* Mowing stripes — base */
-    repeating-linear-gradient(
-      0deg,
-      #1a5a2a 0px,
-      #1a5a2a 120px,
-      #2c8a3d 120px,
-      #2c8a3d 240px
-    );
-  background-size: 180px 180px, 800px 800px, auto, auto;
-  background-blend-mode: overlay, multiply, normal, normal;
+    /* Fine matte noise — barely there, just kills the plastic look */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' seed='5'/><feColorMatrix values='0 0 0 0 0.08  0 0 0 0 0.18  0 0 0 0 0.12  0 0 0 0.35 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"),
+    /* Soft tonal variation across the page */
+    radial-gradient(ellipse at 20% 10%, #294a3a 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 90%, #18301f 0%, transparent 55%),
+    var(--bg);
+  background-size: 300px 300px, auto, auto, auto;
+  background-blend-mode: multiply, normal, normal, normal;
 }
 
-/* Layer 2: white field lines + vignette */
+/* Vignette only — no field lines */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    /* Soft vignette so edges feel deeper */
-    radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.45) 100%),
-    /* Touchlines */
-    linear-gradient(to right, rgba(255,255,255,0.95) 0, rgba(255,255,255,0.95) 6px, transparent 6px) top left / 100% 6px no-repeat,
-    linear-gradient(to right, rgba(255,255,255,0.95) 0, rgba(255,255,255,0.95) 6px, transparent 6px) bottom left / 100% 6px no-repeat,
-    linear-gradient(to bottom, rgba(255,255,255,0.95) 0, rgba(255,255,255,0.95) 6px, transparent 6px) top left / 6px 100% no-repeat,
-    linear-gradient(to bottom, rgba(255,255,255,0.95) 0, rgba(255,255,255,0.95) 6px, transparent 6px) top right / 6px 100% no-repeat,
-    /* Halfway line */
-    linear-gradient(to bottom, rgba(255,255,255,0.9) 0, rgba(255,255,255,0.9) 5px, transparent 5px) center top / 5px 100% no-repeat,
-    /* Center circle */
-    radial-gradient(circle at center, transparent 138px, rgba(255,255,255,0.95) 138px, rgba(255,255,255,0.95) 144px, transparent 145px),
-    /* Center spot */
-    radial-gradient(circle at center, rgba(255,255,255,0.95) 0, rgba(255,255,255,0.95) 7px, transparent 8px);
-  background-repeat: no-repeat;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.5) 100%);
 }
 
 .font-display {
@@ -90,9 +56,30 @@ body::after {
 
 .gold { color: var(--gold); }
 .gold-bright { color: var(--gold-bright); }
-.bg-card { background: var(--bg-card); }
-.bg-elev { background: var(--bg-elev); }
 .border-line { border-color: var(--border); }
+
+/* ===== Gold glow on every card / elevated surface ===== */
+/* Noticeable halo — appears behind every box throughout the site */
+.bg-card,
+.bg-elev {
+  position: relative;
+}
+.bg-card {
+  background: var(--bg-card);
+  box-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.18),
+    0 0 28px rgba(212, 175, 55, 0.32),
+    0 0 60px rgba(212, 175, 55, 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.45);
+}
+.bg-elev {
+  background: var(--bg-elev);
+  box-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.14),
+    0 0 22px rgba(212, 175, 55, 0.26),
+    0 0 50px rgba(212, 175, 55, 0.14),
+    0 6px 20px rgba(0, 0, 0, 0.4);
+}
 
 .title-treatment {
   font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
