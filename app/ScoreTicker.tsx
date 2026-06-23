@@ -81,7 +81,6 @@ export default async function ScoreTicker() {
       id: 'placeholder',
       stage: 'KICKOFF',
       live: false,
-      done: false,
       label: '🏆 TOURNAMENT KICKS OFF JUNE 11, 2026 · MEXICO CITY',
     });
   }
