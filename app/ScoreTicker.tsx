@@ -33,22 +33,31 @@ function dayET(d: string): string {
 
 export default async function ScoreTicker() {
   const now = new Date();
-  const past = new Date(now.getTime() - 36 * 3600 * 1000).toISOString();
-  const future = new Date(now.getTime() + 72 * 3600 * 1000).toISOString();
+  const future = new Date(now.getTime() + 14 * 24 * 3600 * 1000).toISOString();
 
-  const [{ data: matches }, { data: teams }] = await Promise.all([
+  const [{ data: liveMatches }, { data: upcomingMatches }, { data: teams }] = await Promise.all([
+    // Anything in play right now (no date filter — late kickoffs running past midnight)
     supabase
       .from('matches')
       .select('id, stage, status, utc_date, home_team, away_team, home_score, away_score')
-      .gte('utc_date', past)
+      .in('status', ['IN_PLAY', 'PAUSED'])
+      .order('utc_date'),
+    // Future scheduled matches, next 14 days
+    supabase
+      .from('matches')
+      .select('id, stage, status, utc_date, home_team, away_team, home_score, away_score')
+      .gte('utc_date', now.toISOString())
       .lte('utc_date', future)
+      .in('status', ['SCHEDULED', 'TIMED'])
       .order('utc_date')
       .limit(30),
     supabase.from('teams').select('id, name, flag_emoji, tla'),
   ]);
 
   const teamMap = new Map((teams ?? []).map((t: any) => [t.id, t]));
-  const items = (matches ?? []).map((m: any) => {
+  const combined = [...(liveMatches ?? []), ...(upcomingMatches ?? [])];
+
+  const items = combined.map((m: any) => {
     const home = teamMap.get(m.home_team);
     const away = teamMap.get(m.away_team);
     const homeTag = home?.tla ?? m.home_team;
@@ -56,13 +65,11 @@ export default async function ScoreTicker() {
     const homeFlag = home?.flag_emoji ?? '';
     const awayFlag = away?.flag_emoji ?? '';
     const live = m.status === 'IN_PLAY' || m.status === 'PAUSED';
-    const done = m.status === 'FINISHED';
     return {
       id: m.id,
       stage: prettyStage(m.stage),
       live,
-      done,
-      label: live || done
+      label: live
         ? `${homeFlag} ${homeTag} ${m.home_score} - ${m.away_score} ${awayTag} ${awayFlag}`
         : `${homeFlag} ${homeTag} vs ${awayTag} ${awayFlag} · ${dayET(m.utc_date)} ${timeET(m.utc_date)} ET`,
     };
@@ -98,9 +105,6 @@ export default async function ScoreTicker() {
                 </span>
                 {it.live && (
                   <span className="text-[10px] font-bold text-red-400 animate-pulse">● LIVE</span>
-                )}
-                {it.done && (
-                  <span className="text-[10px] font-bold text-[color:var(--text-dim)]">FINAL</span>
                 )}
                 <span className={it.live ? 'gold-bright font-bold' : 'text-white font-semibold'}>
                   {it.label}
