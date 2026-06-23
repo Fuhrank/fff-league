@@ -1,4 +1,5 @@
 import Hero from './Hero';
+import ScoreTicker from './ScoreTicker';
 import SportCarousel from './SportCarousel';
 
 export const dynamic = 'force-dynamic';
@@ -8,6 +9,8 @@ export default function HomePage() {
   return (
     <div className="flex flex-col gap-4">
       <Hero />
+
+      <ScoreTicker />
 
       <SportCarousel />
 

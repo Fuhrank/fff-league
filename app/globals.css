@@ -143,3 +143,37 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   .animate-mesh-a, .animate-mesh-b, .animate-mesh-c { animation: none; }
 }
+
+/* ===== Score ticker marquee ===== */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker-track {
+  animation: ticker-scroll 60s linear infinite;
+  width: max-content;
+}
+.ticker-track-wrap:hover .ticker-track {
+  animation-play-state: paused;
+}
+.ticker-track-wrap::before,
+.ticker-track-wrap::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 40px;
+  z-index: 2;
+  pointer-events: none;
+}
+.ticker-track-wrap::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-elev), transparent);
+}
+.ticker-track-wrap::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-elev), transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track { animation: none; }
+}
