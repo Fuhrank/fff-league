@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>FFF League — Bodega Street</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&family=Permanent+Marker&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --paper:#fff7e6;
+    --ink:#111;
+    --red:#e63946;       /* lotería red */
+    --blue:#1d4ed8;      /* jersey blue */
+    --yellow:#ffd23f;    /* taxicab / lottery yellow */
+    --green:#06a77d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.5;
+    background-image:
+      radial-gradient(rgba(0,0,0,.04) 1px, transparent 1px);
+    background-size:18px 18px;
+  }
+  .stamp{font-family:'Permanent Marker',cursive}
+  .display{font-family:'Bebas Neue',sans-serif;letter-spacing:.02em}
+
+  header{
+    background:var(--ink);
+    color:var(--paper);
+    padding:14px 24px;
+    display:flex;align-items:center;justify-content:space-between;
+    border-bottom:6px solid var(--yellow);
+  }
+  .lockup{display:flex;align-items:center;gap:12px}
+  .ticket-logo{
+    background:var(--yellow);color:var(--ink);
+    padding:6px 12px;border-radius:4px;
+    font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.05em;
+    transform:rotate(-2deg);
+    box-shadow:3px 3px 0 var(--red);
+  }
+  .brand-tag{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--yellow)}
+  nav a{color:var(--paper);text-decoration:none;margin-left:18px;font-weight:600;font-size:14px;text-transform:uppercase}
+  nav a:hover{color:var(--yellow)}
+
+  .hero{
+    padding:60px 24px 80px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:'★ ★ ★';position:absolute;top:24px;left:50%;transform:translateX(-50%);
+    color:var(--red);font-size:18px;letter-spacing:14px;
+  }
+  .hero h1{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:96px;line-height:.95;
+    letter-spacing:.01em;
+    margin-bottom:14px;
+  }
+  .hero h1 .red{color:var(--red);display:inline-block;transform:rotate(-1deg)}
+  .hero h1 .blue{color:var(--blue)}
+  .stamp-tag{
+    display:inline-block;
+    color:var(--red);
+    font-size:24px;
+    transform:rotate(-3deg);
+    border:3px solid var(--red);
+    padding:6px 18px;
+    margin:20px 0 28px;
+  }
+  .tag{font-size:17px;max-width:540px;margin:0 auto 32px;color:#333}
+  .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .btn{
+    padding:14px 28px;font-weight:800;text-decoration:none;
+    text-transform:uppercase;letter-spacing:.05em;font-size:14px;
+    border:3px solid var(--ink);
+    transition:all .12s ease;
+    display:inline-block;
+  }
+  .btn-primary{background:var(--red);color:#fff;box-shadow:5px 5px 0 var(--ink)}
+  .btn-primary:hover{transform:translate(2px,2px);box-shadow:3px 3px 0 var(--ink)}
+  .btn-ghost{background:var(--yellow);color:var(--ink);box-shadow:5px 5px 0 var(--ink)}
+  .btn-ghost:hover{transform:translate(2px,2px);box-shadow:3px 3px 0 var(--ink)}
+
+  .ticket-row{
+    background:var(--ink);color:var(--paper);
+    padding:48px 24px;
+    overflow:hidden;
+  }
+  .tickets{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;max-width:980px;margin:0 auto}
+  .ticket{
+    background:var(--paper);color:var(--ink);
+    padding:18px;border-radius:8px;
+    min-width:240px;
+    position:relative;
+    box-shadow:0 6px 0 var(--red);
+  }
+  .ticket.blue{box-shadow:0 6px 0 var(--blue)}
+  .ticket::after{
+    content:'';position:absolute;left:0;right:0;bottom:-4px;height:4px;
+    background-image:radial-gradient(circle, var(--ink) 1.5px, transparent 1.5px);
+    background-size:10px 4px;
+  }
+  .ticket-label{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.3em;color:var(--red);margin-bottom:6px}
+  .ticket.blue .ticket-label{color:var(--blue)}
+  .ticket-name{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1}
+  .ticket-meta{font-size:11px;color:#666;margin-top:8px;text-transform:uppercase;letter-spacing:.1em}
+
+  .palette{
+    padding:32px 24px;display:flex;justify-content:center;gap:0;flex-wrap:wrap;
+    border-bottom:6px solid var(--ink);
+  }
+  .sw{width:160px;height:100px;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.15em}
+
+  .leaderboard{padding:64px 24px;max-width:720px;margin:0 auto}
+  .lb-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;border-bottom:4px solid var(--ink);padding-bottom:8px}
+  .lb-head h2{font-family:'Bebas Neue',sans-serif;font-size:42px}
+  .lb-head .stamp-mini{color:var(--red);font-family:'Permanent Marker',cursive;font-size:18px;transform:rotate(-4deg)}
+  .lb-row{
+    display:flex;align-items:center;
+    padding:14px 0;border-bottom:2px dashed var(--ink);
+  }
+  .lb-rank{
+    width:44px;height:44px;border-radius:50%;
+    background:var(--yellow);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Bebas Neue',sans-serif;font-size:24px;
+    border:3px solid var(--ink);margin-right:16px;
+  }
+  .lb-rank.first{background:var(--red);color:#fff}
+  .lb-rank.second{background:var(--blue);color:#fff}
+  .lb-name{flex:1;font-weight:800;font-size:18px}
+  .lb-pts{font-family:'Bebas Neue',sans-serif;font-size:24px;margin-right:18px}
+  .lb-wag{font-family:'Permanent Marker',cursive;font-size:18px}
+  .lb-wag.up{color:var(--green)}
+  .lb-wag.down{color:var(--red)}
+
+  .taglines{padding:48px 24px;text-align:center;background:var(--yellow);border-top:6px solid var(--ink);border-bottom:6px solid var(--ink)}
+  .taglines h3{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.3em;margin-bottom:20px}
+  .taglines p{font-family:'Bebas Neue',sans-serif;font-size:32px;margin:10px 0}
+  .taglines .stamp-line{font-family:'Permanent Marker',cursive;font-size:22px;color:var(--red);transform:rotate(-2deg);display:inline-block;margin:4px 0}
+
+  footer{background:var(--ink);color:var(--paper);padding:24px;text-align:center;font-family:'Bebas Neue',sans-serif;letter-spacing:.3em;font-size:14px}
+  footer .red{color:var(--red)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="lockup">
+    <div class="ticket-logo">FFF</div>
+    <div>
+      <div class="display" style="font-size:22px;color:var(--paper)">LEAGUE</div>
+      <div class="brand-tag">For the block · Est. '26</div>
+    </div>
+  </div>
+  <nav>
+    <a href="#">Today</a>
+    <a href="#">Table</a>
+    <a href="#">Wagers</a>
+    <a href="#">Pa' la casa</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>
+    <span class="red">PICK 'EM.</span><br/>
+    <span>BET 'EM.</span><br/>
+    <span class="blue">OWN 'EM.</span>
+  </h1>
+  <div class="stamp stamp-tag">★ Bragging rights, official ★</div>
+  <p class="tag">The fantasy league for friend groups, cousins, and the group chat that won't shut up about who's better. Make your picks. Settle the wagers. Get the ring.</p>
+  <div class="cta">
+    <a class="btn btn-primary" href="#">Get in the league</a>
+    <a class="btn btn-ghost" href="#">See how it works</a>
+  </div>
+</section>
+
+<section class="ticket-row">
+  <div class="tickets">
+    <div class="ticket">
+      <div class="ticket-label">★ THE BLOCK</div>
+      <div class="ticket-name">CCT FUTBOL<br/>LEAGUE</div>
+      <div class="ticket-meta">12 owners · 4 picks · Bragging rights</div>
+    </div>
+    <div class="ticket blue">
+      <div class="ticket-label">★ THE FAMILY</div>
+      <div class="ticket-name">COUSINS<br/>LEAGUE</div>
+      <div class="ticket-meta">8 owners · 6 picks · No mercy</div>
+    </div>
+  </div>
+</section>
+
+<section class="palette">
+  <div class="sw" style="background:var(--paper);color:var(--ink);border:2px solid var(--ink)">PAPER · #FFF7E6</div>
+  <div class="sw" style="background:var(--ink);color:var(--paper)">INK · #111</div>
+  <div class="sw" style="background:var(--red);color:#fff">LOTERÍA · #E63946</div>
+  <div class="sw" style="background:var(--blue);color:#fff">JERSEY · #1D4ED8</div>
+  <div class="sw" style="background:var(--yellow);color:var(--ink)">TAXI · #FFD23F</div>
+  <div class="sw" style="background:var(--green);color:#fff">PAY UP · #06A77D</div>
+</section>
+
+<section class="leaderboard">
+  <div class="lb-head">
+    <h2>CCT · Matchweek 2</h2>
+    <div class="stamp-mini">paid up ✓</div>
+  </div>
+  <div class="lb-row">
+    <div class="lb-rank first">1</div>
+    <div class="lb-name">Frank M.</div>
+    <div class="lb-pts">34</div>
+    <div class="lb-wag up">+$45</div>
+  </div>
+  <div class="lb-row">
+    <div class="lb-rank second">2</div>
+    <div class="lb-name">Carlos R.</div>
+    <div class="lb-pts">31</div>
+    <div class="lb-wag up">+$20</div>
+  </div>
+  <div class="lb-row">
+    <div class="lb-rank">3</div>
+    <div class="lb-name">Diego P.</div>
+    <div class="lb-pts">28</div>
+    <div class="lb-wag down">-$10</div>
+  </div>
+  <div class="lb-row">
+    <div class="lb-rank">4</div>
+    <div class="lb-name">Marco V.</div>
+    <div class="lb-pts">26</div>
+    <div class="lb-wag up">+$5</div>
+  </div>
+  <div class="lb-row">
+    <div class="lb-rank">5</div>
+    <div class="lb-name">Luis A.</div>
+    <div class="lb-pts">22</div>
+    <div class="lb-wag down">-$25</div>
+  </div>
+</section>
+
+<section class="taglines">
+  <h3>★ TAGLINE OPTIONS ★</h3>
+  <p>PICK 'EM. BET 'EM. OWN 'EM.</p>
+  <p>YOUR LEAGUE. YOUR RULES.</p>
+  <div class="stamp-line">"the only fantasy app that talks like the group chat"</div>
+  <p>BRAGGING RIGHTS, OFFICIAL.</p>
+</section>
+
+<footer>FFF · LEAGUE · <span class="red">★</span> · BUILT FOR THE BLOCK · MORENO 'MMXXVI</footer>
+
+</body>
+</html>

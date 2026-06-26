@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>FFF League — Classic Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --green:#0b3d2e;       /* deep pitch green */
+    --green-2:#13533f;
+    --cream:#f4ead5;       /* old paper / kit cream */
+    --gold:#c9a14a;        /* trophy gold */
+    --gold-2:#e9c97a;
+    --ink:#1a1410;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    line-height:1.55;
+  }
+  .display{font-family:'Cinzel',serif;letter-spacing:.04em}
+  header{
+    background:var(--green);
+    color:var(--cream);
+    padding:18px 28px;
+    display:flex;align-items:center;justify-content:space-between;
+    border-bottom:3px solid var(--gold);
+  }
+  .lockup{display:flex;align-items:center;gap:14px}
+  .crest{width:48px;height:48px}
+  nav a{color:var(--cream);text-decoration:none;margin-left:22px;font-size:14px;letter-spacing:.05em;text-transform:uppercase;opacity:.85}
+  nav a:hover{opacity:1;color:var(--gold-2)}
+
+  .hero{
+    background:
+      radial-gradient(ellipse at top, rgba(201,161,74,.18), transparent 60%),
+      linear-gradient(180deg,var(--green) 0%,var(--green-2) 100%);
+    color:var(--cream);
+    padding:80px 28px 100px;
+    text-align:center;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .est{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.4em;color:var(--gold-2);margin-bottom:18px}
+  .hero h1{font-family:'Cinzel',serif;font-size:64px;font-weight:800;letter-spacing:.02em;line-height:1.05;margin-bottom:18px}
+  .hero h1 span{color:var(--gold-2)}
+  .tag{font-size:18px;max-width:580px;margin:0 auto 32px;opacity:.92}
+  .cta{display:inline-flex;gap:14px;justify-content:center}
+  .btn{
+    padding:14px 28px;border-radius:2px;font-weight:700;text-decoration:none;
+    letter-spacing:.08em;text-transform:uppercase;font-size:13px;
+    transition:transform .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn-primary{background:var(--gold);color:var(--ink);border:1px solid var(--gold)}
+  .btn-ghost{background:transparent;color:var(--cream);border:1px solid var(--cream)}
+
+  .crest-showcase{
+    background:var(--cream);
+    padding:64px 28px;
+    text-align:center;
+    border-bottom:1px solid rgba(0,0,0,.08);
+  }
+  .section-label{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.4em;color:var(--green);text-transform:uppercase;margin-bottom:12px}
+  .section-title{font-family:'Cinzel',serif;font-size:28px;margin-bottom:36px}
+  .crests-row{display:flex;justify-content:center;gap:60px;flex-wrap:wrap}
+  .crest-card{text-align:center}
+  .crest-card svg{width:120px;height:120px;margin-bottom:14px}
+  .crest-card h3{font-family:'Cinzel',serif;font-size:16px;letter-spacing:.05em}
+  .crest-card p{font-size:12px;color:#6b5d44;margin-top:4px}
+
+  .palette{
+    background:var(--ink);color:var(--cream);
+    padding:48px 28px;
+    display:flex;justify-content:center;gap:0;flex-wrap:wrap;
+  }
+  .swatch{width:140px;height:120px;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;font-size:11px;letter-spacing:.1em}
+  .swatch.cream{background:var(--cream);color:var(--ink)}
+  .swatch.green{background:var(--green);color:var(--cream)}
+  .swatch.green2{background:var(--green-2);color:var(--cream)}
+  .swatch.gold{background:var(--gold);color:var(--ink)}
+  .swatch.gold2{background:var(--gold-2);color:var(--ink)}
+
+  .preview{
+    background:var(--cream);padding:64px 28px;
+  }
+  .preview-card{
+    max-width:720px;margin:0 auto;
+    background:#fff;border:1px solid rgba(0,0,0,.08);
+    border-top:4px solid var(--gold);
+    padding:32px;
+    box-shadow:0 8px 30px rgba(0,0,0,.06);
+  }
+  .preview-card h2{font-family:'Cinzel',serif;font-size:22px;margin-bottom:4px}
+  .preview-card .sub{font-size:13px;color:#6b5d44;margin-bottom:20px;letter-spacing:.05em;text-transform:uppercase}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{text-align:left;padding:10px 8px;border-bottom:2px solid var(--green);font-family:'Cinzel',serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--green)}
+  td{padding:10px 8px;border-bottom:1px solid rgba(0,0,0,.06)}
+  tr:last-child td{border-bottom:none}
+  .rank{font-family:'Cinzel',serif;font-weight:700;color:var(--gold);width:30px}
+  .leader td{font-weight:700}
+
+  footer{background:var(--green);color:rgba(244,234,213,.6);padding:28px;text-align:center;font-size:12px;letter-spacing:.15em;text-transform:uppercase}
+  footer .gold{color:var(--gold-2)}
+
+  .taglines{padding:64px 28px;text-align:center;background:#efe4c8}
+  .taglines p{font-family:'Cinzel',serif;font-size:20px;margin:14px 0;color:var(--green)}
+  .taglines p::before, .taglines p::after{content:'—';color:var(--gold);margin:0 14px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="lockup">
+    <!-- Crest mark -->
+    <svg class="crest" viewBox="0 0 64 64">
+      <defs>
+        <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#e9c97a"/>
+          <stop offset="1" stop-color="#c9a14a"/>
+        </linearGradient>
+      </defs>
+      <path d="M32 2 L58 12 L58 32 Q58 52 32 62 Q6 52 6 32 L6 12 Z" fill="url(#g1)" stroke="#0b3d2e" stroke-width="2"/>
+      <text x="32" y="40" text-anchor="middle" font-family="Cinzel" font-size="22" font-weight="800" fill="#0b3d2e">FFF</text>
+    </svg>
+    <div>
+      <div class="display" style="font-size:18px;color:var(--cream)">FFF LEAGUE</div>
+      <div style="font-size:10px;letter-spacing:.3em;color:var(--gold-2);text-transform:uppercase">Est. MMXXVI</div>
+    </div>
+  </div>
+  <nav>
+    <a href="#">Today</a>
+    <a href="#">Table</a>
+    <a href="#">Wagers</a>
+    <a href="#">Owners</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="est">— A Gentleman's Pool —</div>
+  <h1>Own your league.<br/><span>Win the bragging rights.</span></h1>
+  <p class="tag">Private fantasy leagues built for friend groups who take it personally. Make your picks, settle your wagers, and lift the trophy when the season's done.</p>
+  <div class="cta">
+    <a class="btn btn-primary" href="#">Enter Your League</a>
+    <a class="btn btn-ghost" href="#">How It Works</a>
+  </div>
+</section>
+
+<section class="crest-showcase">
+  <div class="section-label">The Leagues</div>
+  <h2 class="section-title">Two clubs. One champion.</h2>
+  <div class="crests-row">
+    <div class="crest-card">
+      <svg viewBox="0 0 120 120">
+        <path d="M60 6 L108 22 L108 60 Q108 96 60 114 Q12 96 12 60 L12 22 Z" fill="#0b3d2e" stroke="#c9a14a" stroke-width="3"/>
+        <circle cx="60" cy="48" r="14" fill="none" stroke="#c9a14a" stroke-width="2"/>
+        <text x="60" y="54" text-anchor="middle" font-family="Cinzel" font-size="14" font-weight="800" fill="#c9a14a">CCT</text>
+        <text x="60" y="84" text-anchor="middle" font-family="Cinzel" font-size="9" letter-spacing="2" fill="#f4ead5">FUTBOL LEAGUE</text>
+      </svg>
+      <h3>CCT Futbol League</h3>
+      <p>12 owners · 4 picks · Est. 2026</p>
+    </div>
+    <div class="crest-card">
+      <svg viewBox="0 0 120 120">
+        <path d="M60 6 L108 22 L108 60 Q108 96 60 114 Q12 96 12 60 L12 22 Z" fill="#c9a14a" stroke="#0b3d2e" stroke-width="3"/>
+        <path d="M40 50 Q60 35 80 50" fill="none" stroke="#0b3d2e" stroke-width="2.5"/>
+        <text x="60" y="58" text-anchor="middle" font-family="Cinzel" font-size="13" font-weight="800" fill="#0b3d2e">CL</text>
+        <text x="60" y="84" text-anchor="middle" font-family="Cinzel" font-size="9" letter-spacing="2" fill="#0b3d2e">COUSINS LEAGUE</text>
+      </svg>
+      <h3>Cousins League</h3>
+      <p>8 owners · 6 picks · Est. 2026</p>
+    </div>
+  </div>
+</section>
+
+<section class="palette">
+  <div class="swatch cream">CREAM<br/>#F4EAD5</div>
+  <div class="swatch green">PITCH<br/>#0B3D2E</div>
+  <div class="swatch green2">FIELD<br/>#13533F</div>
+  <div class="swatch gold">TROPHY<br/>#C9A14A</div>
+  <div class="swatch gold2">SUNLIGHT<br/>#E9C97A</div>
+</section>
+
+<section class="preview">
+  <div class="preview-card">
+    <h2>CCT Futbol League</h2>
+    <div class="sub">Group Stage · Matchweek 2</div>
+    <table>
+      <tr><th></th><th>Owner</th><th>Pts</th><th>Wagers</th></tr>
+      <tr class="leader"><td class="rank">1</td><td>Frank M.</td><td>34</td><td>+$45</td></tr>
+      <tr><td class="rank">2</td><td>Carlos R.</td><td>31</td><td>+$20</td></tr>
+      <tr><td class="rank">3</td><td>Diego P.</td><td>28</td><td>-$10</td></tr>
+      <tr><td class="rank">4</td><td>Marco V.</td><td>26</td><td>+$5</td></tr>
+      <tr><td class="rank">5</td><td>Luis A.</td><td>22</td><td>-$25</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="taglines">
+  <div class="section-label" style="margin-bottom:24px">Tagline Options</div>
+  <p>Own your league</p>
+  <p>For friends who take it personally</p>
+  <p>The commissioner's club</p>
+  <p>Bragging rights, formalized</p>
+</section>
+
+<footer>
+  FFF LEAGUE · <span class="gold">EST. MMXXVI</span> · A MORENO HOUSE PRODUCTION
+</footer>
+
+</body>
+</html>

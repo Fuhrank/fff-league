@@ -2,7 +2,8 @@ import { supabase } from '@/lib/supabase';
 import ProposeWagerForm from './ProposeWagerForm';
 import AcceptOpenWager from './AcceptOpenWager';
 
-export const revalidate = 30;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 type Wager = {
   id: string;
