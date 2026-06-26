@@ -15,8 +15,21 @@
 
 import { supabaseAdmin } from './supabase';
 
-const ESPN_SCOREBOARD =
+const ESPN_SCOREBOARD_BASE =
   'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
+
+// ESPN's scoreboard with no params returns ONLY today's matches.
+// We pass a wide dates= window so stale TIMED rows (matches that finished
+// while sync was down — Mac asleep, GH Actions skipped, etc.) get backfilled.
+// Window: last 7 days through next 14 days. Covers any gap shorter than a week.
+function buildScoreboardUrl(): string {
+  const fmt = (d: Date) =>
+    `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`;
+  const now = Date.now();
+  const start = new Date(now - 7 * 24 * 3600 * 1000);
+  const end = new Date(now + 14 * 24 * 3600 * 1000);
+  return `${ESPN_SCOREBOARD_BASE}?dates=${fmt(start)}-${fmt(end)}&limit=200`;
+}
 
 // ESPN status.type.state → our DB status enum (matches FD's original values).
 const STATE_MAP: Record<string, string> = {
@@ -38,7 +51,7 @@ function canonTla(abbr: string | undefined | null): string | null {
 }
 
 export async function syncFromEspn() {
-  const res = await fetch(ESPN_SCOREBOARD, { cache: 'no-store' });
+  const res = await fetch(buildScoreboardUrl(), { cache: 'no-store' });
   if (!res.ok) {
     throw new Error(`espn scoreboard ${res.status}: ${(await res.text()).slice(0, 300)}`);
   }
