@@ -296,5 +296,36 @@ export async function syncFromEspn() {
     }
   }
 
+  // Auto-tag GROUP eliminations: once we see ANY KO match in the schedule
+  // (ESPN posts the bracket as soon as groups finish), every team that
+  // doesn't appear in a KO matchup is by definition group-stage eliminated.
+  // This catches the 3rd-place teams that fail to make the best-3rd advancers
+  // — they're not "losers of a specific match", they're losers of the
+  // composite tiebreaker, which ESPN doesn't expose as an event. The bracket
+  // composition is the ground truth.
+  const koTeams = new Set<string>();
+  for (const ev of events) {
+    const slug = (ev.season?.slug ?? '').toLowerCase();
+    if (!STAGE_MAP[slug] || STAGE_MAP[slug] === 'GROUP_STAGE') continue;
+    const comp = ev.competitions?.[0];
+    if (!comp) continue;
+    for (const c of comp.competitors ?? []) {
+      const tla = canonTla(c.team?.abbreviation);
+      if (tla && validTlas.has(tla)) koTeams.add(tla);
+    }
+  }
+  if (koTeams.size > 0) {
+    const { data: allTeams } = await supabaseAdmin
+      .from('teams').select('id, eliminated_round');
+    for (const t of allTeams ?? []) {
+      if (koTeams.has(t.id)) continue;          // advanced past groups
+      if (t.eliminated_round) continue;         // already tagged (GROUP or deeper)
+      const { error: gErr } = await supabaseAdmin
+        .from('teams').update({ eliminated_round: 'GROUP' }).eq('id', t.id);
+      if (gErr) throw new Error(`tag group elimination ${t.id}: ${gErr.message}`);
+      eliminationsSet++;
+    }
+  }
+
   return { upserted: updated, inserted, notMatched, goalRows, eliminationsSet };
 }
