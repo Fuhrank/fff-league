@@ -69,7 +69,7 @@ const STAGE_TO_ELIMINATED: Record<string, string> = {
 // ESPN occasionally uses different abbreviations than FD did. Add aliases
 // here as we discover them (key = ESPN abbr, value = canonical DB TLA).
 const ESPN_TLA_ALIASES: Record<string, string> = {
-  // none observed yet; populate as needed
+  URU: 'URY', // Uruguay — ESPN uses URU, DB uses URY (2026-06-29)
 };
 
 // ESPN bracket placeholders ("RD32 W1", "W1", "RD16", etc.) appear before
