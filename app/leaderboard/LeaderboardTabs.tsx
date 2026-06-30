@@ -99,20 +99,40 @@ function GroupTable({
                       {r.flags.length > 0 && (
                         <span className="inline-flex items-center gap-1">
                           {r.flags.map((f, idx) => {
-                            const iso = flagEmojiToIso(f);
-                            return iso ? (
+                            const iso = flagEmojiToIso(f.flag);
+                            const flagEl = iso ? (
                               <img
-                                key={idx}
                                 src={`https://flagcdn.com/24x18/${iso}.png`}
                                 srcSet={`https://flagcdn.com/48x36/${iso}.png 2x`}
                                 width={24}
                                 height={18}
-                                alt=""
+                                alt={f.name}
                                 className="rounded-[2px] border border-line/60 shadow-sm"
                                 loading="lazy"
                               />
                             ) : (
-                              <span key={idx} className="text-base leading-none">{f}</span>
+                              <span className="text-base leading-none">{f.flag}</span>
+                            );
+                            return (
+                              <span
+                                key={idx}
+                                className="relative inline-flex items-center"
+                                title={f.eliminated ? `${f.name} — eliminated` : f.name}
+                              >
+                                <span className={f.eliminated ? 'opacity-50' : ''}>{flagEl}</span>
+                                {f.eliminated && (
+                                  <span
+                                    aria-label="eliminated"
+                                    className="pointer-events-none absolute inset-0 flex items-center justify-center text-red-500 font-black text-base leading-none"
+                                    style={{
+                                      textShadow: '0 0 2px rgba(0,0,0,0.95), 0 0 1px rgba(0,0,0,0.95)',
+                                      WebkitTextStroke: '0.5px rgba(0,0,0,0.6)',
+                                    }}
+                                  >
+                                    ✕
+                                  </span>
+                                )}
+                              </span>
                             );
                           })}
                         </span>

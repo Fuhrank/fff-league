@@ -234,7 +234,7 @@ export type LeaderboardRow = {
   paid: boolean;
   total: number;
   goals: number;      // tiebreaker
-  flags: string[];    // drafted team flag emojis
+  flags: Array<{ flag: string; name: string; eliminated: boolean }>;    // drafted teams
   breakdown: Record<string, number>;
   grade: string;      // A+, A, B+, ... based on roster strength vs group
   ev: number;         // expected points from roster (modeled off title odds)
@@ -285,7 +285,7 @@ export async function loadLeaderboard(db: SupabaseClient): Promise<LeaderboardRo
   const [{ data: players }, { data: events }, { data: picks }] = await Promise.all([
     db.from('players').select('id, name, slug, group_no, paid'),
     db.from('scoring_events').select('player_id, kind, points'),
-    db.from('picks').select('player_id, pick_order, team:teams(flag_emoji, name, title_odds)').order('pick_order'),
+    db.from('picks').select('player_id, pick_order, team:teams(flag_emoji, name, title_odds, eliminated_round)').order('pick_order'),
   ]);
   if (!players) return [];
 
@@ -298,7 +298,8 @@ export async function loadLeaderboard(db: SupabaseClient): Promise<LeaderboardRo
     if (!row) continue;
     const team = (pk as any).team;
     const flag = team?.flag_emoji || '🏳️';
-    row.flags.push(flag);
+    const elim = !!team?.eliminated_round && team.eliminated_round !== 'CHAMPION';
+    row.flags.push({ flag, name: team?.name ?? '', eliminated: elim });
     row.ev += teamExpectedPoints(team?.title_odds);
   }
   for (const e of events ?? []) {

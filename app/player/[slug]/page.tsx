@@ -57,9 +57,12 @@ export default async function PlayerPage({ params }: { params: Promise<{ slug: s
             return (
               <div key={p.team_id} className="rounded-xl border border-line bg-card p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{team?.flag_emoji}</span>
-                    <span className="font-semibold">{team?.name ?? p.team_id}</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`text-2xl ${team?.eliminated_round && team.eliminated_round !== 'CHAMPION' ? 'opacity-50 grayscale' : ''}`}>{team?.flag_emoji}</span>
+                    <span className={`font-semibold ${team?.eliminated_round && team.eliminated_round !== 'CHAMPION' ? 'line-through text-[color:var(--text-dim)]' : ''}`}>{team?.name ?? p.team_id}</span>
+                    {team?.eliminated_round && team.eliminated_round !== 'CHAMPION' && (
+                      <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">(eliminated)</span>
+                    )}
                   </div>
                   <span className="text-xl font-bold gold-bright">{t.total}</span>
                 </div>
