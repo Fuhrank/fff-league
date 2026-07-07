@@ -8,7 +8,7 @@ const LEAGUE_LINKS = [
   { href: '/leaderboard', label: 'Leaderboard' },
   { href: '/today',       label: 'Today' },
   { href: '/draft',       label: 'Draft' },
-  { href: '/odds',        label: 'Odds' },
+  { href: '/rankings',    label: 'Rankings' },
   { href: '/wagers',      label: 'Wagers' },
   { href: '/rules',       label: 'Rules' },
 ];
@@ -21,7 +21,7 @@ type SportMenu = {
 };
 
 const SPORT_MENUS: SportMenu[] = [
-  { key: 'wc',  label: 'World Cup', enabled: true,  matchPrefix: '/leaderboard|/today|/draft|/odds|/wagers|/rules' },
+  { key: 'wc',  label: 'World Cup', enabled: true,  matchPrefix: '/leaderboard|/today|/draft|/rankings|/odds|/wagers|/rules' },
   { key: 'nfl', label: 'NFL',       enabled: false },
   { key: 'mlb', label: 'MLB',       enabled: false },
   { key: 'nba', label: 'NBA',       enabled: false },
