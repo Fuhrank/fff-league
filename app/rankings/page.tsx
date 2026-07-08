@@ -43,9 +43,9 @@ type Row = {
   matchPts: number;            // W*3 + D*1
   goalPts: number;             // goals
   advancePts: number;
-  spoonPts: number;
-  total: number;
-  reached: string;             // deepest stage reached (label)
+  projSpoonPts: number;        // NOT added to total — projected only
+  total: number;               // matchPts + goalPts + advancePts
+  reached: string;
   matchesPlayed: number;
 };
 
@@ -83,16 +83,16 @@ export default async function RankingsPage() {
     supabase.from('goals').select('team_id, is_own_goal, is_penalty_shootout'),
   ]);
 
-  const teams  = (teamsRaw   ?? []) as Team[];
+  const teams   = (teamsRaw   ?? []) as Team[];
   const matches = (matchesRaw ?? []) as Match[];
-  const goals  = (goalsRaw   ?? []) as Goal[];
+  const goals   = (goalsRaw   ?? []) as Goal[];
 
   // Seed a row per team
   const byId = new Map<string, Row>();
   for (const t of teams) {
     byId.set(t.id, {
       team: t, wins: 0, draws: 0, losses: 0,
-      goals: 0, matchPts: 0, goalPts: 0, advancePts: 0, spoonPts: 0, total: 0,
+      goals: 0, matchPts: 0, goalPts: 0, advancePts: 0, projSpoonPts: 0, total: 0,
       reached: 'GROUP_STAGE', matchesPlayed: 0,
     });
   }
@@ -128,7 +128,7 @@ export default async function RankingsPage() {
   const STAGE_RANK: Record<string, number> = {
     GROUP_STAGE: 0, LAST_32: 1, LAST_16: 2, QUARTER_FINALS: 3, SEMI_FINALS: 4, FINAL: 5,
   };
-  const awarded = new Set<string>(); // `${team_id}|${kind}`
+  const awarded = new Set<string>();
   for (const m of matches) {
     const advKind = STAGE_TO_ADVANCE[m.stage];
     if (advKind) {
@@ -142,7 +142,6 @@ export default async function RankingsPage() {
         if ((STAGE_RANK[m.stage] ?? 0) > (STAGE_RANK[r.reached] ?? 0)) r.reached = m.stage;
       }
     }
-    // Champion bonus
     if (m.stage === 'FINAL' && m.status === 'FINISHED') {
       let champ: string | null = null;
       if (m.duration === 'PENALTY_SHOOTOUT') {
@@ -157,22 +156,27 @@ export default async function RankingsPage() {
     }
   }
 
-  // ---- Wooden spoon (safe to include now — group stage is over) ----
-  // Rank teams by matches played ascending; bottom 10 get +10, bottom 2 get +20 (stack).
-  const spoonRanked = [...byId.values()].sort(
-    (a, b) => a.matchesPlayed - b.matchesPlayed || a.goals - b.goals
-  );
-  spoonRanked.slice(0, 10).forEach(r => { r.spoonPts += 10; });
-  spoonRanked.slice(0, 2).forEach(r  => { r.spoonPts += 20; });
-
-  // ---- Totals + final sort ----
+  // ---- Totals (WITHOUT projected spoon) ----
   const rows = [...byId.values()];
-  for (const r of rows) r.total = r.matchPts + r.goalPts + r.advancePts + r.spoonPts;
+  for (const r of rows) r.total = r.matchPts + r.goalPts + r.advancePts;
+
+  // ---- Projected wooden spoon (ranked by CURRENT fantasy points, tiebreak = goals) ----
+  // Bottom 10 = +10; bottom 2 = +20 additional (so bottom-2 = +30 total).
+  // Purely projection — does NOT modify r.total. Auto-applied at tournament end via lib/scoring.ts.
+  const spoonRanked = [...rows].sort(
+    (a, b) => a.total - b.total || a.goals - b.goals || a.team.name.localeCompare(b.team.name)
+  );
+  spoonRanked.slice(0, 10).forEach(r => { r.projSpoonPts += 10; });
+  spoonRanked.slice(0, 2).forEach(r  => { r.projSpoonPts += 20; });
+
+  // ---- Final sort: by real (pre-spoon) total, tiebreak on goals ----
   rows.sort((a, b) =>
     b.total - a.total ||
     b.goals - a.goals ||
     a.team.name.localeCompare(b.team.name)
   );
+
+  const tournamentDone = matches.length > 0 && matches.every(m => m.status === 'FINISHED' || m.status === 'CANCELLED');
 
   return (
     <div>
@@ -184,7 +188,7 @@ export default async function RankingsPage() {
       </div>
 
       <div className="rounded-xl border border-line bg-card overflow-hidden">
-        <div className="grid grid-cols-[28px_1.4fr_44px_44px_44px_44px_50px_50px_50px_60px] sm:grid-cols-[36px_2fr_50px_50px_50px_50px_60px_60px_60px_72px] gap-1 sm:gap-2 px-3 sm:px-4 py-3 text-[9px] sm:text-[10px] uppercase tracking-widest text-[color:var(--text-dim)] border-b border-line font-semibold">
+        <div className="grid grid-cols-[28px_1.4fr_40px_40px_40px_40px_50px_50px_60px_60px] sm:grid-cols-[36px_2fr_48px_48px_48px_48px_60px_60px_72px_72px] gap-1 sm:gap-2 px-3 sm:px-4 py-3 text-[9px] sm:text-[10px] uppercase tracking-widest text-[color:var(--text-dim)] border-b border-line font-semibold">
           <div>#</div>
           <div>Team</div>
           <div className="text-center">W</div>
@@ -193,8 +197,8 @@ export default async function RankingsPage() {
           <div className="text-center">G</div>
           <div className="text-right">Match</div>
           <div className="text-right">Adv</div>
-          <div className="text-right">Spoon</div>
           <div className="text-right gold-bright">Total</div>
+          <div className="text-right text-red-300/80" title="Projected wooden-spoon points — applied automatically when tournament ends">Proj Spoon</div>
         </div>
         {rows.map((r, i) => {
           const elim = !!r.team.eliminated_round && r.team.eliminated_round !== 'CHAMPION';
@@ -206,7 +210,7 @@ export default async function RankingsPage() {
           return (
             <div
               key={r.team.id}
-              className="grid grid-cols-[28px_1.4fr_44px_44px_44px_44px_50px_50px_50px_60px] sm:grid-cols-[36px_2fr_50px_50px_50px_50px_60px_60px_60px_72px] gap-1 sm:gap-2 px-3 sm:px-4 py-2.5 text-xs sm:text-sm border-b border-line/40 last:border-0 hover:bg-elev items-center"
+              className="grid grid-cols-[28px_1.4fr_40px_40px_40px_40px_50px_50px_60px_60px] sm:grid-cols-[36px_2fr_48px_48px_48px_48px_60px_60px_72px_72px] gap-1 sm:gap-2 px-3 sm:px-4 py-2.5 text-xs sm:text-sm border-b border-line/40 last:border-0 hover:bg-elev items-center"
             >
               <div className={`tabular-nums ${rankStyle}`}>{i + 1}</div>
               <div className="flex items-center gap-2 min-w-0">
@@ -230,8 +234,10 @@ export default async function RankingsPage() {
               <div className="text-center tabular-nums">{r.goals}</div>
               <div className="text-right tabular-nums text-[color:var(--text-dim)]">{r.matchPts + r.goalPts}</div>
               <div className="text-right tabular-nums text-[color:var(--text-dim)]">{r.advancePts || '—'}</div>
-              <div className="text-right tabular-nums text-[color:var(--text-dim)]">{r.spoonPts || '—'}</div>
               <div className="text-right tabular-nums gold-bright font-bold">{r.total}</div>
+              <div className={`text-right tabular-nums ${r.projSpoonPts ? 'text-red-300/90 font-semibold' : 'text-[color:var(--text-dim)]/60'}`}>
+                {r.projSpoonPts ? `+${r.projSpoonPts}` : '—'}
+              </div>
             </div>
           );
         })}
@@ -243,7 +249,13 @@ export default async function RankingsPage() {
           Advancement: R32 +5, R16 +6, QF +7, SF +8, Final +9, Champion +10.
         </p>
         <p>
-          <span className="gold-bright font-semibold">Wooden spoon:</span> The 10 teams with the fewest matches played get +10; the bottom 2 also get an additional +20 (so a bottom-2 team = +30 total). Applied globally across all 48 teams (not per league) — this page is a team-level view.
+          <span className="text-red-300/90 font-semibold">Proj Spoon</span>{' '}
+          shows <em>projected</em> wooden-spoon points based on current fantasy point totals.
+          The 10 lowest-scoring teams get +10; the bottom 2 also get an additional +20 (so a bottom-2 team = +30 total).
+          Tiebreaker: fewer goals = worse.
+          {tournamentDone
+            ? ' The tournament is over — these points are now locked in.'
+            : ' Not applied to the Total until the tournament ends.'}
         </p>
         <p>
           <span className="gold-bright font-semibold">Tiebreaker:</span> Goals scored (excl. own goals & shootouts).

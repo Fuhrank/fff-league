@@ -183,24 +183,28 @@ export async function recomputeScoring(db: SupabaseClient) {
     && (matches as Match[]).every(m => m.status === 'FINISHED' || m.status === 'CANCELLED');
 
   if (allDone) {
-    // Rank teams by how far they got (proxy: number of matches played).
-    const teamMatchCount = new Map<string, number>();
-    for (const m of matches as Match[]) {
-      teamMatchCount.set(m.home_team, (teamMatchCount.get(m.home_team) ?? 0) + 1);
-      teamMatchCount.set(m.away_team, (teamMatchCount.get(m.away_team) ?? 0) + 1);
+    // Rank teams by TOTAL FANTASY POINTS EARNED (excluding wooden-spoon itself).
+    // Tiebreaker: fewer goals = worse. This matches the /rankings page ordering.
+    const teamPoints = new Map<string, { pts: number; goals: number }>();
+    for (const e of events) {
+      const cur = teamPoints.get(e.team_id) ?? { pts: 0, goals: 0 };
+      cur.pts += e.points;
+      if (e.kind === 'GOAL') cur.goals += e.points;
+      teamPoints.set(e.team_id, cur);
     }
 
-    // Group picks per league: group_no -> Array<{team_id, player_id, n}>
-    const byGroup = new Map<number, { team_id: string; player_id: number; n: number }[]>();
+    // Group picks per league: group_no -> Array<{team_id, player_id, pts, goals}>
+    const byGroup = new Map<number, { team_id: string; player_id: number; pts: number; goals: number }[]>();
     for (const p of picks as Pick[]) {
       const g = playerGroup.get(p.player_id) ?? 1;
       const list = byGroup.get(g) ?? [];
-      list.push({ team_id: p.team_id, player_id: p.player_id, n: teamMatchCount.get(p.team_id) ?? 0 });
+      const tp = teamPoints.get(p.team_id) ?? { pts: 0, goals: 0 };
+      list.push({ team_id: p.team_id, player_id: p.player_id, pts: tp.pts, goals: tp.goals });
       byGroup.set(g, list);
     }
 
     for (const [, list] of byGroup) {
-      const ranked = [...list].sort((a, b) => a.n - b.n);
+      const ranked = [...list].sort((a, b) => a.pts - b.pts || a.goals - b.goals);
       const bottom10 = ranked.slice(0, 10);
       const bottom2  = ranked.slice(0, 2);
       for (const x of bottom10) {
