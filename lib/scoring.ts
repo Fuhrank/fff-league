@@ -178,11 +178,10 @@ export async function recomputeScoring(db: SupabaseClient) {
     }
   }
 
-  // -------- wooden spoon (per-group, only after tournament fully complete) --------
-  const allDone = (matches as Match[]).length > 0
-    && (matches as Match[]).every(m => m.status === 'FINISHED' || m.status === 'CANCELLED');
-
-  if (allDone) {
+  // -------- wooden spoon (per-group) --------
+  // Applied live from tournament start — final-match result won't change bottom rankings
+  // enough to matter, and Frank prefers seeing the bonus reflected in the leaderboard early.
+  {
     // Rank teams by TOTAL FANTASY POINTS EARNED (excluding wooden-spoon itself).
     // Tiebreaker: fewer goals = worse. This matches the /rankings page ordering.
     const teamPoints = new Map<string, { pts: number; goals: number }>();
