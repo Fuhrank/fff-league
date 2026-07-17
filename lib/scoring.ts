@@ -97,7 +97,7 @@ export async function recomputeScoring(db: SupabaseClient) {
   type Event = {
     player_id: number;
     team_id: string;
-    match_id: number;
+    match_id: number | null;
     kind: string;
     points: number;
     detail: string | null;
@@ -207,10 +207,10 @@ export async function recomputeScoring(db: SupabaseClient) {
       const bottom10 = ranked.slice(0, 10);
       const bottom2  = ranked.slice(0, 2);
       for (const x of bottom10) {
-        events.push({ player_id: x.player_id, team_id: x.team_id, match_id: 0, kind: 'WOODEN_BOTTOM_10', points: 10, detail: 'wooden-spoon bottom 10 (per group)' });
+        events.push({ player_id: x.player_id, team_id: x.team_id, match_id: null, kind: 'WOODEN_BOTTOM_10', points: 10, detail: 'wooden-spoon bottom 10 (per group)' });
       }
       for (const x of bottom2) {
-        events.push({ player_id: x.player_id, team_id: x.team_id, match_id: 0, kind: 'WOODEN_BOTTOM_2', points: 20, detail: 'wooden-spoon bottom 2 (per group)' });
+        events.push({ player_id: x.player_id, team_id: x.team_id, match_id: null, kind: 'WOODEN_BOTTOM_2', points: 20, detail: 'wooden-spoon bottom 2 (per group)' });
       }
     }
   }
